@@ -46,9 +46,21 @@ const SvgBoxText: FunctionComponent<React.SVGProps<SVGTextElement> & { borderCol
   </>
 }
 
-const gaugeTheme = ({
+interface GaugeTheme {
+  valueHeight: number;
+  gaugeHeight: number;
+  gaugePaddingSides: number;
+  colorsAndTargets: Color[];
+  colorSecondary: string, // todo: color type ?
+  mode: "progress" | "bullet",
+  textColorOutside: string // todo: color type ?
+  textColorInside: string // todo: color type ?
+
+}
+
+const gaugeTheme: GaugeTheme = ({
   valueHeight: 20,
-  gaugeHeight: 30,
+  gaugeHeight: 20,
   gaugePaddingSides: 20,
   colorsAndTargets: [
     { value: 95, type: "min", hex: "#ff0000", ...({} as any) },
@@ -120,7 +132,6 @@ const GaugeMini: FunctionComponent<{ value: number }> = ({ value }) => {
   const valueFrac = ((value - colorMin.value) / colorLen);
 
   const gaugeBarY = centerY - (gaugeHeight / 2);
-  const gaugeBarValueY = centerY - (gaugeHeight / 2);
   const gaugeBarWidth = width - gaugePaddingSides * 2;
   const gaugeBarValueWidth = gaugeBarWidth * valueFrac;
 
