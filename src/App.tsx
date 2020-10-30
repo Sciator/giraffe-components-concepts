@@ -47,8 +47,8 @@ const SvgBoxText: FunctionComponent<React.SVGProps<SVGTextElement> & { borderCol
 }
 
 const gaugeTheme = ({
-  gaugeHeight: 20,
-  gaugeHeightPadding: 10,
+  valueHeight: 20,
+  gaugeHeight: 30,
   gaugePaddingSides: 20,
   colorsAndTargets: [
     { value: 95, type: "min", hex: "#ff0000", ...({} as any) },
@@ -60,7 +60,7 @@ const gaugeTheme = ({
     // { value: 312, type: "target", hex: "#ffff00", ...({} as any) },
   ] as Color[],
   colorSecondary: "black",
-  mode: "bullet" as "progress" | "bullet",
+  mode: "progress" as "progress" | "bullet",
   textColorOutside: "white",
   textColorInside: "black",
 })
@@ -69,18 +69,23 @@ const throwReturn = <T extends unknown>(msg: string): T => {
   throw new Error(msg);
 }
 
+const Gauge = () => {
+
+}
+
+
 const GaugeMini: FunctionComponent<{ value: number }> = ({ value }) => {
   // data
   // const value = .7;
 
-  const { colorSecondary, colorsAndTargets, gaugeHeight, gaugePaddingSides, mode, textColorInside, textColorOutside, gaugeHeightPadding } = gaugeTheme;
+  const { colorSecondary, colorsAndTargets, gaugeHeight, gaugePaddingSides, mode, textColorInside, textColorOutside, valueHeight } = gaugeTheme;
 
   const colors = colorsAndTargets.filter(x => x.type !== "target");
   const targets = colorsAndTargets.filter(({ type }) => type === "target");
 
   const colorModeGradient = colors.length === 2;
-  const colorMin:Color = colors.find(x => x.type === "min") ?? throwReturn("color of type min must be defined");
-  const colorMax:Color = colors.find(x => x.type === "max") ?? throwReturn("color of type max must be defined");
+  const colorMin: Color = colors.find(x => x.type === "min") ?? throwReturn("color of type min must be defined");
+  const colorMax: Color = colors.find(x => x.type === "max") ?? throwReturn("color of type max must be defined");
 
   const color = mode === "bullet"
     ? colorSecondary
@@ -114,8 +119,7 @@ const GaugeMini: FunctionComponent<{ value: number }> = ({ value }) => {
   const colorLen = (colorMax.value - colorMin.value);
   const valueFrac = ((value - colorMin.value) / colorLen);
 
-  const gaugeBarHeight = gaugeHeight + gaugeHeightPadding;
-  const gaugeBarY = centerY - (gaugeBarHeight / 2);
+  const gaugeBarY = centerY - (gaugeHeight / 2);
   const gaugeBarValueY = centerY - (gaugeHeight / 2);
   const gaugeBarWidth = width - gaugePaddingSides * 2;
   const gaugeBarValueWidth = gaugeBarWidth * valueFrac;
@@ -153,40 +157,40 @@ const GaugeMini: FunctionComponent<{ value: number }> = ({ value }) => {
 
   return (
     <svg width={width} height={height}>
-      <rect height={gaugeBarHeight} width={gaugeBarWidth} x={gaugePaddingSides} y={gaugeBarY} />
-      <rect height={gaugeHeight} width={gaugeBarValueWidth} x={gaugePaddingSides} y={gaugeBarValueY} fill={color as any} />
-      <text ref={textRef} x={gaugePaddingSides + gaugeBarValueWidth} y={centerY} fill={textColor} style={{ filter: "invert(1);" }} textAnchor={textAnchor}
-        alignmentBaseline="central"
-      >{textValue}</text>
-      <line x1={gaugePaddingSides} x2={gaugeBarWidth + gaugePaddingSides}
-        y1={gaugeBarY + gaugeBarHeight + 5} y2={gaugeBarY + gaugeBarHeight + 5} style={axesLineStyle} />
-      {range(axesSteps).map(x => {
-        const posXStart = gaugePaddingSides;
-        const posXEnd = gaugeBarWidth + gaugePaddingSides;
-        const posXLen = posXEnd - posXStart;
-        const posX = posXLen * x / (axesSteps - 1) + posXStart;
+      <g {...t(gaugePaddingSides, gaugeBarY)}>
+        <rect height={gaugeHeight} width={gaugeBarWidth} />
+        <rect height={valueHeight} width={gaugeBarValueWidth} y={(gaugeHeight - valueHeight) / 2} fill={color as any} />
+      </g>
+      <g>
+        <text ref={textRef} x={gaugePaddingSides + gaugeBarValueWidth} y={centerY} fill={textColor} textAnchor={textAnchor}
+          alignmentBaseline="central"
+        >{textValue}</text>
+      </g>
 
-        const value = colorLen * x / (axesSteps - 1) + colorMin.value;
+      <g {...t(0, gaugeBarY + gaugeHeight + 5)}>
+        <line x1={gaugePaddingSides} x2={gaugeBarWidth + gaugePaddingSides}
+          style={axesLineStyle} />
+        {range(axesSteps).map(x => {
+          const posX = gaugeBarWidth * x / (axesSteps - 1) + gaugePaddingSides;
+          const value = colorLen * x / (axesSteps - 1) + colorMin.value;
 
-        return <>
-          <g
-            {...t(posX, gaugeBarY + gaugeBarHeight)}
-          >
-            <line
-              y1={5} y2={10}
-              style={axesLineStyle}
-            />
-            <text
-              y={10}
-              textAnchor="middle"
-              alignmentBaseline="hanging"
-              fill={axesColor}
-            >
-              {value.toFixed(0)}
-            </text>
-          </g>
-        </>
-      })}
+          return <>
+            <g {...t(posX, 5)} >
+              <line
+                y1={-5}
+                style={axesLineStyle}
+              />
+              <text
+                textAnchor="middle"
+                alignmentBaseline="hanging"
+                fill={axesColor}
+              >
+                {value.toFixed(0)}
+              </text>
+            </g>
+          </>
+        })}
+      </g>
       {targets.map(({ value, hex }) => {
         const posX = gaugeBarWidth * ((value - colorMin.value) / colorLen);
 
