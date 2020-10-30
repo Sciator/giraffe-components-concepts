@@ -46,16 +46,11 @@ const SvgBoxText: FunctionComponent<React.SVGProps<SVGTextElement> & { borderCol
   </>
 }
 
-const GaugeMini: FunctionComponent<{ value: number }> = ({ value }) => {
-  // data
-  // const value = .7;
-
-  // #region theme
-
-  const gaugeHeight = 20;
-  const gaugeHeightPadding = 10;
-  const gaugePaddingSides = 20;
-  const colorsAndTargets: Color[] = [
+const gaugeTheme = ({
+  gaugeHeight: 20,
+  gaugeHeightPadding: 10,
+  gaugePaddingSides: 20,
+  colorsAndTargets: [
     { value: 95, type: "min", hex: "#ff0000", ...({} as any) },
     { value: 240, type: "threshold", hex: "#aaaaff", ...({} as any) },
     { value: 450, type: "threshold", hex: "#7777ff", ...({} as any) },
@@ -63,25 +58,31 @@ const GaugeMini: FunctionComponent<{ value: number }> = ({ value }) => {
 
     // { value: 725, type: "target", hex: "#ff0000", ...({} as any) },
     // { value: 312, type: "target", hex: "#ffff00", ...({} as any) },
-  ];
-  const colorSecondary = "black";
+  ] as Color[],
+  colorSecondary: "black",
+  mode: "bullet" as "progress" | "bullet",
+  textColorOutside: "white",
+  textColorInside: "black",
+})
 
-  const mode: "progress" | "bullet" = "bullet"
+const throwReturn = <T extends unknown>(msg: string): T => {
+  throw new Error(msg);
+}
 
-  const textColorOutside = "white";
-  const textColorInside = "black";
+const GaugeMini: FunctionComponent<{ value: number }> = ({ value }) => {
+  // data
+  // const value = .7;
 
-  // #endregion
+  const { colorSecondary, colorsAndTargets, gaugeHeight, gaugePaddingSides, mode, textColorInside, textColorOutside, gaugeHeightPadding } = gaugeTheme;
 
-  const isBullet = mode === "bullet";
   const colors = colorsAndTargets.filter(x => x.type !== "target");
   const targets = colorsAndTargets.filter(({ type }) => type === "target");
 
   const colorModeGradient = colors.length === 2;
-  const colorMin = colors.find(x => x.type === "min")!;
-  const colorMax = colors.find(x => x.type === "max")!;
+  const colorMin:Color = colors.find(x => x.type === "min") ?? throwReturn("color of type min must be defined");
+  const colorMax:Color = colors.find(x => x.type === "max") ?? throwReturn("color of type max must be defined");
 
-  const color = isBullet
+  const color = mode === "bullet"
     ? colorSecondary
     : d3Color(
       (() => {
