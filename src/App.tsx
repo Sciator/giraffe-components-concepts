@@ -114,27 +114,18 @@ const GaugeBarBackground: FunctionComponent<{
 }
 
 const GaugeBarValue: FunctionComponent<{
-  valueHeight: number,
+  theme: GaugeTheme,
   gaugeBarValueWidth: number,
   gaugeHeight: number,
-  colorValue: string,
-}> = ({ colorValue, gaugeBarValueWidth, gaugeHeight, valueHeight }) => {
-  return <>
-    <rect height={valueHeight} width={gaugeBarValueWidth} y={(gaugeHeight - valueHeight) / 2} fill={colorValue as any} />
-  </>;
-}
-
-const GaugeMini: FunctionComponent<{ value: number }> = ({ value }) => {
-  // data
-  // const value = .7;
-
-  const { colorSecondary, colorsAndTargets, gaugeHeight, gaugePaddingSides, mode, textColorInside, textColorOutside, valueHeight } = gaugeTheme;
-
-  const colors = getColors(gaugeTheme);
+  colors: Colors,
+  mode: "bullet" | "progress",
+  value: number,
+}> = ({ colors, gaugeBarValueWidth, gaugeHeight, mode, value, theme }) => {
+  const { valueHeight } = theme;
   const colorModeGradient = colors.thresholds.length === 0;
 
   const colorValue = mode === "bullet"
-    ? colorSecondary
+    ? colors.secondary
     : d3Color(
       (() => {
         if (colorModeGradient) {
@@ -159,6 +150,19 @@ const GaugeMini: FunctionComponent<{ value: number }> = ({ value }) => {
       .brighter(1)
       .formatHex()
     ;
+
+  return <>
+    <rect height={valueHeight} width={gaugeBarValueWidth} y={(gaugeHeight - valueHeight) / 2} fill={colorValue as any} />
+  </>;
+}
+
+const GaugeMini: FunctionComponent<{ value: number }> = ({ value }) => {
+  // data
+  // const value = .7;
+
+  const { colorSecondary, colorsAndTargets, gaugeHeight, gaugePaddingSides, mode, textColorInside, textColorOutside, valueHeight } = gaugeTheme;
+
+  const colors = getColors(gaugeTheme);
 
   const centerY = height / 2
 
@@ -200,11 +204,13 @@ const GaugeMini: FunctionComponent<{ value: number }> = ({ value }) => {
     transform: `translate(${x},${y})`
   })
 
+  const theme = gaugeTheme;
+
   return (
     <svg width={width} height={height}>
       <g {...t(gaugePaddingSides, gaugeBarY)}>
         <GaugeBarBackground {...{ gaugeHeight, gaugeBarWidth }} />
-        <GaugeBarValue {...{ colorValue, gaugeBarValueWidth, gaugeHeight, valueHeight }} />
+        <GaugeBarValue {...{ theme, colors, gaugeBarValueWidth, gaugeHeight, mode, value }} />
       </g>
       <g>
         <text ref={textRef} x={gaugePaddingSides + gaugeBarValueWidth} y={centerY} fill={textColor} textAnchor={textAnchor}
@@ -264,11 +270,25 @@ const GaugeMini: FunctionComponent<{ value: number }> = ({ value }) => {
 }
 
 const App: FunctionComponent<any> = () => {
+  const { min: { value: min }, max: { value: max } } = getColors(gaugeTheme);
+
+  const [val, setVal] = useState(min);
+
+  const loop = () => {
+    setTimeout(() => {
+      let newVal = val + 1;
+      if (newVal > max)
+        newVal = min;
+      setVal(newVal);
+    }, 5);
+  }
+
+  useEffect(() => loop(), [val]);
 
   return (
     <div className="App" style={{}}>
       <div style={{ minWidth: `${width}`, minHeight: `${height}`, borderColor: "black", borderWidth: "1px", borderStyle: "solid", display: "inline-block" }}>
-        {GaugeMini({ value: 100 })}
+        {GaugeMini({ value: val })}
       </div>
       <div style={{ minWidth: `${width}`, minHeight: `${height}`, borderColor: "black", borderWidth: "1px", borderStyle: "solid", display: "inline-block" }}>
         {GaugeMini({ value: 125 })}
