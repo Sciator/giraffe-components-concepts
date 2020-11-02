@@ -116,12 +116,10 @@ const GaugeBarBackground: FunctionComponent<{
 const GaugeBarValue: FunctionComponent<{
   theme: GaugeTheme,
   gaugeBarValueWidth: number,
-  gaugeHeight: number,
   colors: Colors,
-  mode: "bullet" | "progress",
   value: number,
-}> = ({ colors, gaugeBarValueWidth, gaugeHeight, mode, value, theme }) => {
-  const { valueHeight } = theme;
+}> = ({ colors, gaugeBarValueWidth, value, theme }) => {
+  const { valueHeight, gaugeHeight, mode } = theme;
   const colorModeGradient = colors.thresholds.length === 0;
 
   const colorValue = mode === "bullet"
@@ -210,7 +208,7 @@ const GaugeMini: FunctionComponent<{ value: number }> = ({ value }) => {
     <svg width={width} height={height}>
       <g {...t(gaugePaddingSides, gaugeBarY)}>
         <GaugeBarBackground {...{ gaugeHeight, gaugeBarWidth }} />
-        <GaugeBarValue {...{ theme, colors, gaugeBarValueWidth, gaugeHeight, mode, value }} />
+        <GaugeBarValue {...{ colors, gaugeBarValueWidth, theme, value }} />
       </g>
       <g>
         <text ref={textRef} x={gaugePaddingSides + gaugeBarValueWidth} y={centerY} fill={textColor} textAnchor={textAnchor}
@@ -277,8 +275,8 @@ const App: FunctionComponent<any> = () => {
   const loop = () => {
     setTimeout(() => {
       let newVal = val + 1;
-      if (newVal > max)
-        newVal = min;
+      if (newVal > max+70)
+        newVal = min-70;
       setVal(newVal);
     }, 5);
   }
