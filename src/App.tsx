@@ -60,7 +60,7 @@ interface GaugeTheme {
 
 const gaugeTheme: GaugeTheme = ({
   valueHeight: 20,
-  gaugeHeight: 20,
+  gaugeHeight: 30,
   gaugePaddingSides: 20,
   colorsAndTargets: [
     { value: 95, type: "min", hex: "#ff0000", ...({} as any) },
@@ -72,7 +72,7 @@ const gaugeTheme: GaugeTheme = ({
     // { value: 312, type: "target", hex: "#ffff00", ...({} as any) },
   ] as Color[],
   colorSecondary: "black",
-  mode: "progress" as "progress" | "bullet",
+  mode: "progress",
   textColorOutside: "white",
   textColorInside: "black",
 })
@@ -81,10 +81,16 @@ const throwReturn = <T extends unknown>(msg: string): T => {
   throw new Error(msg);
 }
 
-const Gauge = () => {
-
+const GaugeBackgroundBar: FunctionComponent<{
+  valueHeight: number,
+  gaugeBarValueWidth: number,
+  gaugeHeight: number,
+  colorValue: string,
+}> = ({ colorValue, gaugeBarValueWidth, gaugeHeight, valueHeight }) => {
+  return <>
+    <rect height={valueHeight} width={gaugeBarValueWidth} y={(gaugeHeight - valueHeight) / 2} fill={colorValue as any} />
+  </>;
 }
-
 
 const GaugeMini: FunctionComponent<{ value: number }> = ({ value }) => {
   // data
@@ -99,7 +105,7 @@ const GaugeMini: FunctionComponent<{ value: number }> = ({ value }) => {
   const colorMin: Color = colors.find(x => x.type === "min") ?? throwReturn("color of type min must be defined");
   const colorMax: Color = colors.find(x => x.type === "max") ?? throwReturn("color of type max must be defined");
 
-  const color = mode === "bullet"
+  const colorValue = mode === "bullet"
     ? colorSecondary
     : d3Color(
       (() => {
@@ -170,7 +176,7 @@ const GaugeMini: FunctionComponent<{ value: number }> = ({ value }) => {
     <svg width={width} height={height}>
       <g {...t(gaugePaddingSides, gaugeBarY)}>
         <rect height={gaugeHeight} width={gaugeBarWidth} />
-        <rect height={valueHeight} width={gaugeBarValueWidth} y={(gaugeHeight - valueHeight) / 2} fill={color as any} />
+        <GaugeBackgroundBar {...{ colorValue, gaugeBarValueWidth, gaugeHeight, valueHeight }} />
       </g>
       <g>
         <text ref={textRef} x={gaugePaddingSides + gaugeBarValueWidth} y={centerY} fill={textColor} textAnchor={textAnchor}
