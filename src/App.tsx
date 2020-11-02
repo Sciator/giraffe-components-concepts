@@ -58,7 +58,9 @@ interface GaugeTheme {
   mode: "progress" | "bullet",
   textColorOutside: TColor
   textColorInside: TColor
-
+  axesColor: TColor;
+  axesStrokeWidth: string | number;
+  axesSteps: number;
 }
 
 type Colors = {
@@ -82,6 +84,7 @@ const getColors = (theme: GaugeTheme): Colors => {
 }
 
 const gaugeTheme: GaugeTheme = ({
+  mode: "progress",
   valueHeight: 20,
   gaugeHeight: 30,
   gaugePaddingSides: 20,
@@ -91,13 +94,15 @@ const gaugeTheme: GaugeTheme = ({
     { value: 450, type: "threshold", hex: "#7777ff", ...({} as any) },
     { value: 812, type: "max", hex: "#00ff00", ...({} as any) },
 
-    // { value: 725, type: "target", hex: "#ff0000", ...({} as any) },
-    // { value: 312, type: "target", hex: "#ffff00", ...({} as any) },
+    { value: 725, type: "target", hex: "#ff0000", ...({} as any) },
+    { value: 312, type: "target", hex: "#ffff00", ...({} as any) },
   ] as Color[],
   colorSecondary: "black",
-  mode: "progress",
   textColorOutside: "white",
   textColorInside: "black",
+  axesColor: "darkgray",
+  axesSteps: 5,
+  axesStrokeWidth: "2px",
 })
 
 const throwReturn = <T extends unknown>(msg: string): T => {
@@ -222,9 +227,9 @@ const GaugeMini: FunctionComponent<{ value: number }> = ({ value }) => {
     : textColorOutside
     ;
 
-  const axesColor = "darkgray";
-  const axesLineStyle = { stroke: axesColor, strokeWidth: "2px" };
-  const axesSteps = 5;
+  const { axesColor, axesSteps, axesStrokeWidth } = gaugeTheme;
+
+  const axesLineStyle = { stroke: axesColor, strokeWidth: axesStrokeWidth };
 
   const t = (x: number, y: number) => ({
     transform: `translate(${x},${y})`
