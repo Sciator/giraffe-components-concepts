@@ -105,11 +105,34 @@ const throwReturn = <T extends unknown>(msg: string): T => {
 }
 
 const GaugeBarBackground: FunctionComponent<{
-  gaugeHeight: number,
+  theme: GaugeTheme,
+  colors: Colors,
   gaugeBarWidth: number,
-}> = ({ gaugeBarWidth, gaugeHeight }) => {
+  getFrac: (x: number) => number,
+}> = ({ theme, colors: { max, min, secondary, thresholds }, gaugeBarWidth, getFrac }) => {
+  const { gaugeHeight, mode } = theme;
+
+  const colors: { start: number, end: number, col: string }[] = [];
+  if (mode === "progress") {
+    colors.push({ start: 0, end: 1, col: secondary })
+  } else {
+    const all = [min, ...thresholds, max];
+    let start = 0;
+    for (let i = 0; i + 1 < all.length; i++) {
+      const { hex: col } = all[i];
+      const { value } = all[i + 1];
+
+      const end = getFrac(value);
+
+      colors.push({ start, end, col });
+      start = end;
+    }
+  }
+
   return <>
-    <rect height={gaugeHeight} width={gaugeBarWidth} />
+    {colors.map(({ col, end, start }) =>
+      <rect height={gaugeHeight} x={gaugeBarWidth * start} width={gaugeBarWidth * (end - start)} fill={col} />
+    )}
   </>
 }
 
@@ -162,9 +185,10 @@ const GaugeMini: FunctionComponent<{ value: number }> = ({ value }) => {
 
   const colors = getColors(gaugeTheme);
 
+  const colorLen = (colors.max.value - colors.min.value);
+
   const centerY = height / 2
 
-  const colorLen = (colors.max.value - colors.min.value);
   const valueFrac = ((value - colors.min.value) / colorLen);
 
   const gaugeBarY = centerY - (gaugeHeight / 2);
@@ -177,6 +201,10 @@ const GaugeMini: FunctionComponent<{ value: number }> = ({ value }) => {
 
   const [textRect, setTextRect] = useState<SVGRect | null>(null);
 
+  /** return value as fraction 0->min 1->max */
+  const getFrac = (val: number): number =>
+    (val - colors.min.value) / colorLen
+    ;
 
   useEffect(() => {
     setTextRect(textRef.current?.getBBox() as SVGRect)
@@ -207,7 +235,7 @@ const GaugeMini: FunctionComponent<{ value: number }> = ({ value }) => {
   return (
     <svg width={width} height={height}>
       <g {...t(gaugePaddingSides, gaugeBarY)}>
-        <GaugeBarBackground {...{ gaugeHeight, gaugeBarWidth }} />
+        <GaugeBarBackground {...{ colors, gaugeBarWidth, theme, getFrac: getFrac }} />
         <GaugeBarValue {...{ colors, gaugeBarValueWidth, theme, value }} />
       </g>
       <g>
@@ -275,8 +303,8 @@ const App: FunctionComponent<any> = () => {
   const loop = () => {
     setTimeout(() => {
       let newVal = val + 1;
-      if (newVal > max+70)
-        newVal = min-70;
+      if (newVal > max + 70)
+        newVal = min - 70;
       setVal(newVal);
     }, 5);
   }
