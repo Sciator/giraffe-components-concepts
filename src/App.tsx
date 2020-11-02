@@ -104,7 +104,16 @@ const throwReturn = <T extends unknown>(msg: string): T => {
   throw new Error(msg);
 }
 
-const GaugeBackgroundBar: FunctionComponent<{
+const GaugeBarBackground: FunctionComponent<{
+  gaugeHeight: number,
+  gaugeBarWidth: number,
+}> = ({ gaugeBarWidth, gaugeHeight }) => {
+  return <>
+    <rect height={gaugeHeight} width={gaugeBarWidth} />
+  </>
+}
+
+const GaugeBarValue: FunctionComponent<{
   valueHeight: number,
   gaugeBarValueWidth: number,
   gaugeHeight: number,
@@ -194,8 +203,8 @@ const GaugeMini: FunctionComponent<{ value: number }> = ({ value }) => {
   return (
     <svg width={width} height={height}>
       <g {...t(gaugePaddingSides, gaugeBarY)}>
-        <rect height={gaugeHeight} width={gaugeBarWidth} />
-        <GaugeBackgroundBar {...{ colorValue, gaugeBarValueWidth, gaugeHeight, valueHeight }} />
+        <GaugeBarBackground {...{ gaugeHeight, gaugeBarWidth }} />
+        <GaugeBarValue {...{ colorValue, gaugeBarValueWidth, gaugeHeight, valueHeight }} />
       </g>
       <g>
         <text ref={textRef} x={gaugePaddingSides + gaugeBarValueWidth} y={centerY} fill={textColor} textAnchor={textAnchor}
