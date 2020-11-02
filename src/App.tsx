@@ -46,16 +46,39 @@ const SvgBoxText: FunctionComponent<React.SVGProps<SVGTextElement> & { borderCol
   </>
 }
 
+// todo: color type ?
+type TColor = string;
+
 interface GaugeTheme {
   valueHeight: number;
   gaugeHeight: number;
   gaugePaddingSides: number;
   colorsAndTargets: Color[];
-  colorSecondary: string, // todo: color type ?
+  colorSecondary: TColor,
   mode: "progress" | "bullet",
-  textColorOutside: string // todo: color type ?
-  textColorInside: string // todo: color type ?
+  textColorOutside: TColor
+  textColorInside: TColor
 
+}
+
+type Colors = {
+  min: Color,
+  max: Color,
+  secondary: TColor,
+  thresholds: Color[],
+  targets: Color[],
+}
+
+const getColors = (theme: GaugeTheme): Colors => {
+  const { colorSecondary: secondary, colorsAndTargets } = theme;
+
+  const min: Color = colorsAndTargets.find(x => x.type === "min") ?? throwReturn("color of type min must be defined");
+  const max: Color = colorsAndTargets.find(x => x.type === "max") ?? throwReturn("color of type max must be defined");
+
+  const thresholds = colorsAndTargets.filter(({ type }) => type === "threshold").sort(({ value: a }, { value: b }) => a - b);
+  const targets = colorsAndTargets.filter(({ type }) => type === "target").sort(({ value: a }, { value: b }) => a - b);
+
+  return { max, min, secondary, targets, thresholds }
 }
 
 const gaugeTheme: GaugeTheme = ({
@@ -98,12 +121,8 @@ const GaugeMini: FunctionComponent<{ value: number }> = ({ value }) => {
 
   const { colorSecondary, colorsAndTargets, gaugeHeight, gaugePaddingSides, mode, textColorInside, textColorOutside, valueHeight } = gaugeTheme;
 
-  const colors = colorsAndTargets.filter(x => x.type !== "target");
-  const targets = colorsAndTargets.filter(({ type }) => type === "target");
-
-  const colorModeGradient = colors.length === 2;
-  const colorMin: Color = colors.find(x => x.type === "min") ?? throwReturn("color of type min must be defined");
-  const colorMax: Color = colors.find(x => x.type === "max") ?? throwReturn("color of type max must be defined");
+  const colors = getColors(gaugeTheme);
+  const colorModeGradient = colors.thresholds.length === 0;
 
   const colorValue = mode === "bullet"
     ? colorSecondary
@@ -112,12 +131,12 @@ const GaugeMini: FunctionComponent<{ value: number }> = ({ value }) => {
         if (colorModeGradient) {
           return (
             scaleLinear()
-              .range([colorMin.hex, colorMax.hex] as any)
-              .domain([colorMin.value, colorMax.value])
+              .range([colors.min.hex, colors.max.hex] as any)
+              .domain([colors.min.value, colors.max.value])
               (value) as any
           )
         } else {
-          const sortedColors = [...colors].sort((a, b) => a.value - b.value);
+          const sortedColors = [colors.min, ...colors.thresholds, colors.max];
           let i = 0;
           while (i < sortedColors.length && value >= sortedColors[i].value) {
             i++;
@@ -134,8 +153,8 @@ const GaugeMini: FunctionComponent<{ value: number }> = ({ value }) => {
 
   const centerY = height / 2
 
-  const colorLen = (colorMax.value - colorMin.value);
-  const valueFrac = ((value - colorMin.value) / colorLen);
+  const colorLen = (colors.max.value - colors.min.value);
+  const valueFrac = ((value - colors.min.value) / colorLen);
 
   const gaugeBarY = centerY - (gaugeHeight / 2);
   const gaugeBarWidth = width - gaugePaddingSides * 2;
@@ -189,7 +208,7 @@ const GaugeMini: FunctionComponent<{ value: number }> = ({ value }) => {
           style={axesLineStyle} />
         {range(axesSteps).map(x => {
           const posX = gaugeBarWidth * x / (axesSteps - 1) + gaugePaddingSides;
-          const value = colorLen * x / (axesSteps - 1) + colorMin.value;
+          const value = colorLen * x / (axesSteps - 1) + colors.min.value;
 
           return <>
             <g {...t(posX, 5)} >
@@ -208,8 +227,8 @@ const GaugeMini: FunctionComponent<{ value: number }> = ({ value }) => {
           </>
         })}
       </g>
-      {targets.map(({ value, hex }) => {
-        const posX = gaugeBarWidth * ((value - colorMin.value) / colorLen);
+      {colors.targets.map(({ value, hex }) => {
+        const posX = gaugeBarWidth * ((value - colors.min.value) / colorLen);
 
         return <>
           <line
