@@ -56,6 +56,7 @@ interface GaugeTheme {
   colorsAndTargets: Color[];
   colorSecondary: TColor,
   mode: "progress" | "bullet",
+  textMode: "follow" | "left",
   textColorOutside: TColor
   textColorInside: TColor
   axesColor: TColor;
@@ -92,20 +93,33 @@ const gaugeTheme: GaugeTheme = ({
   gaugePaddingSides: 20,
   colorsAndTargets: [
     { value: 8, type: "min", hex: "#ff0000", ...({} as any) },
+
     { value: 55, type: "threshold", hex: "#ffff00", ...({} as any) },
     { value: 82, type: "threshold", hex: "#00ff00", ...({} as any) },
-    { value: 120, type: "max", hex: "#00ff00", ...({} as any) },
 
     // { value: 725, type: "target", hex: "#ff0000", ...({} as any) },
     // { value: 312, type: "target", hex: "#ffff00", ...({} as any) },
+
+    { value: 120, type: "max", hex: "#00ff00", ...({} as any) },
   ] as Color[],
   colorSecondary: "black",
+  textMode: "left",
   textColorOutside: "white",
   textColorInside: "white",
   axesColor: "darkgray",
   axesSteps: 4,
   axesStrokeWidth: "2px",
 })
+
+const gaugeTheme2: GaugeTheme = {
+  ...gaugeTheme,
+  valueHeight: 20,
+  gaugeHeight: 10,
+  mode: "progress",
+  colorsAndTargets: [gaugeTheme.colorsAndTargets[0], gaugeTheme.colorsAndTargets[gaugeTheme.colorsAndTargets.length-1]],
+  textColorInside: "black",
+
+};
 
 const throwReturn = <T extends unknown>(msg: string): T => {
   throw new Error(msg);
@@ -184,13 +198,53 @@ const GaugeBarValue: FunctionComponent<{
   </>;
 }
 
-const GaugeMini: FunctionComponent<{ value: number }> = ({ value }) => {
+const GaugeText: FunctionComponent<{
+  theme: GaugeTheme,
+  gaugeBarValueWidth: number,
+  colors: Colors,
+  value: number,
+}> = ({ value, gaugeBarValueWidth, theme }) => {
+  const { textColorInside, textColorOutside, textMode } = theme;
+  const textValue = ` ${(value).toFixed(0)} `
+
+  const [textBBox, setTextBBox] = useState<SVGRect | null>(null);
+  const textRef = useRef<SVGTextElement>(null);
+
+  useEffect(() => {
+    setTextBBox(textRef.current?.getBBox() as SVGRect)
+  }, [])
+
+  const textInside = (textBBox?.width || 0) < gaugeBarValueWidth;
+
+  const textAnchor = (textInside && textMode === "follow")
+    ? "end"
+    : "start"
+    ;
+
+  const textColor = textInside
+    ? textColorInside
+    : textColorOutside
+    ;
+
+  const x = textMode === "follow"
+    ? gaugeBarValueWidth
+    : 0
+    ;
+
+  return <>
+    <text ref={textRef} x={x} fill={textColor} textAnchor={textAnchor}
+      alignmentBaseline="central"
+    >{textValue}</text>
+  </>;
+}
+
+const GaugeMini: FunctionComponent<{ value: number, theme: GaugeTheme }> = ({ value, theme }) => {
   // data
   // const value = .7;
 
-  const { colorSecondary, colorsAndTargets, gaugeHeight, gaugePaddingSides, mode, textColorInside, textColorOutside, valueHeight } = gaugeTheme;
+  const { colorSecondary, colorsAndTargets, gaugeHeight, gaugePaddingSides, mode, textColorInside, textColorOutside, valueHeight } = theme;
 
-  const colors = getColors(gaugeTheme);
+  const colors = getColors(theme);
 
   const colorLen = (colors.max.value - colors.min.value);
 
@@ -202,34 +256,7 @@ const GaugeMini: FunctionComponent<{ value: number }> = ({ value }) => {
   const gaugeBarWidth = width - gaugePaddingSides * 2;
   const gaugeBarValueWidth = gaugeBarWidth * valueFrac;
 
-  const textValue = ` ${(value).toFixed(0)} `
-
-  const textRef = useRef<SVGTextElement>(null);
-
-  const [textRect, setTextRect] = useState<SVGRect | null>(null);
-
-  /** return value as fraction 0->min 1->max */
-  const getFrac = (val: number): number =>
-    (val - colors.min.value) / colorLen
-    ;
-
-  useEffect(() => {
-    setTextRect(textRef.current?.getBBox() as SVGRect)
-  }, [])
-
-  const textInside = (textRect?.width || 0) < gaugeBarValueWidth;
-
-  const textAnchor = textInside
-    ? "end"
-    : "start"
-    ;
-
-  const textColor = textInside
-    ? textColorInside
-    : textColorOutside
-    ;
-
-  const { axesColor, axesSteps, axesStrokeWidth } = gaugeTheme;
+  const { axesColor, axesSteps, axesStrokeWidth } = theme;
 
   const axesLineStyle = { stroke: axesColor, strokeWidth: axesStrokeWidth };
 
@@ -237,18 +264,19 @@ const GaugeMini: FunctionComponent<{ value: number }> = ({ value }) => {
     transform: `translate(${x},${y})`
   })
 
-  const theme = gaugeTheme;
+  /** return value as fraction 0->min 1->max */
+  const getFrac = (val: number): number =>
+    (val - colors.min.value) / colorLen
+    ;
 
   return (
     <svg width={width} height={height}>
       <g {...t(gaugePaddingSides, gaugeBarY)}>
-        <GaugeBarBackground {...{ colors, gaugeBarWidth, theme, getFrac: getFrac }} />
+        <GaugeBarBackground {...{ colors, gaugeBarWidth, theme, getFrac }} />
         <GaugeBarValue {...{ colors, gaugeBarValueWidth, theme, value }} />
       </g>
-      <g>
-        <text ref={textRef} x={gaugePaddingSides + gaugeBarValueWidth} y={centerY} fill={textColor} textAnchor={textAnchor}
-          alignmentBaseline="central"
-        >{textValue}</text>
+      <g {...t(gaugePaddingSides, centerY)}>
+        <GaugeText {...{ centerY, colors, gaugeBarValueWidth, theme, value }} />
       </g>
 
       <g {...t(0, gaugeBarY + gaugeHeight + 5)}>
@@ -320,13 +348,18 @@ const App: FunctionComponent<any> = () => {
 
   return (
     <div className="App" style={{}}>
-      <GaugeMini value={val} />
-      <GaugeMini value={15} />
-      <GaugeMini value={25} />
-      <GaugeMini value={50} />
-      <GaugeMini value={85} />
-      <GaugeMini value={96} />
-      <GaugeMini value={120} />
+      <GaugeMini value={val} theme={gaugeTheme} />
+      <GaugeMini value={val} theme={gaugeTheme2} />
+      <GaugeMini value={15} theme={gaugeTheme} />
+      <GaugeMini value={25} theme={gaugeTheme} />
+      <GaugeMini value={85} theme={gaugeTheme} />
+      <GaugeMini value={96} theme={gaugeTheme} />
+      <GaugeMini value={120} theme={gaugeTheme} />
+      <GaugeMini value={15} theme={gaugeTheme2} />
+      <GaugeMini value={25} theme={gaugeTheme2} />
+      <GaugeMini value={85} theme={gaugeTheme2} />
+      <GaugeMini value={96} theme={gaugeTheme2} />
+      <GaugeMini value={120} theme={gaugeTheme2} />
     </div>
   )
 }
