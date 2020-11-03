@@ -84,22 +84,22 @@ const getColors = (theme: GaugeTheme): Colors => {
 }
 
 const gaugeTheme: GaugeTheme = ({
-  mode: "progress",
+  mode: "bullet",
   valueHeight: 20,
   gaugeHeight: 30,
   gaugePaddingSides: 20,
   colorsAndTargets: [
-    { value: 95, type: "min", hex: "#ff0000", ...({} as any) },
-    { value: 240, type: "threshold", hex: "#aaaaff", ...({} as any) },
-    { value: 450, type: "threshold", hex: "#7777ff", ...({} as any) },
-    { value: 812, type: "max", hex: "#00ff00", ...({} as any) },
+    { value: 8, type: "min", hex: "#ff0000", ...({} as any) },
+    { value: 55, type: "threshold", hex: "#ffff00", ...({} as any) },
+    { value: 82, type: "threshold", hex: "#00ff00", ...({} as any) },
+    { value: 120, type: "max", hex: "", ...({} as any) },
 
-    { value: 725, type: "target", hex: "#ff0000", ...({} as any) },
-    { value: 312, type: "target", hex: "#ffff00", ...({} as any) },
+    // { value: 725, type: "target", hex: "#ff0000", ...({} as any) },
+    // { value: 312, type: "target", hex: "#ffff00", ...({} as any) },
   ] as Color[],
   colorSecondary: "black",
   textColorOutside: "white",
-  textColorInside: "black",
+  textColorInside: "white",
   axesColor: "darkgray",
   axesSteps: 5,
   axesStrokeWidth: "2px",
@@ -173,7 +173,7 @@ const GaugeBarValue: FunctionComponent<{
         }
       })()
     )!
-      .brighter(1)
+      .brighter(1.5)
       .formatHex()
     ;
 
@@ -308,37 +308,37 @@ const App: FunctionComponent<any> = () => {
   const loop = () => {
     setTimeout(() => {
       let newVal = val + 1;
-      if (newVal > max + 70)
-        newVal = min - 70;
+      if (newVal > max)
+        newVal = min;
       setVal(newVal);
-    }, 5);
+    }, 20);
   }
 
   useEffect(() => loop(), [val]);
 
   return (
     <div className="App" style={{}}>
-      <div style={{ minWidth: `${width}`, minHeight: `${height}`, borderColor: "black", borderWidth: "1px", borderStyle: "solid", display: "inline-block" }}>
+      {/* <div style={{ minWidth: `${width}`, minHeight: `${height}`, borderColor: "black", borderWidth: "1px", borderStyle: "solid", display: "inline-block" }}> */}
         {GaugeMini({ value: val })}
-      </div>
-      <div style={{ minWidth: `${width}`, minHeight: `${height}`, borderColor: "black", borderWidth: "1px", borderStyle: "solid", display: "inline-block" }}>
-        {GaugeMini({ value: 125 })}
-      </div>
-      <div style={{ minWidth: `${width}`, minHeight: `${height}`, borderColor: "black", borderWidth: "1px", borderStyle: "solid", display: "inline-block" }}>
-        {GaugeMini({ value: 231 })}
-      </div>
-      <div style={{ minWidth: `${width}`, minHeight: `${height}`, borderColor: "black", borderWidth: "1px", borderStyle: "solid", display: "inline-block" }}>
-        {GaugeMini({ value: 350 })}
-      </div>
-      <div style={{ minWidth: `${width}`, minHeight: `${height}`, borderColor: "black", borderWidth: "1px", borderStyle: "solid", display: "inline-block" }}>
-        {GaugeMini({ value: 483 })}
-      </div>
-      <div style={{ minWidth: `${width}`, minHeight: `${height}`, borderColor: "black", borderWidth: "1px", borderStyle: "solid", display: "inline-block" }}>
-        {GaugeMini({ value: 653 })}
-      </div>
-      <div style={{ minWidth: `${width}`, minHeight: `${height}`, borderColor: "black", borderWidth: "1px", borderStyle: "solid", display: "inline-block" }}>
-        {GaugeMini({ value: 812 })}
-      </div>
+      {/* </div> */}
+      {/* <div style={{ minWidth: `${width}`, minHeight: `${height}`, borderColor: "black", borderWidth: "1px", borderStyle: "solid", display: "inline-block" }}> */}
+        {GaugeMini({ value: 15 })}
+      {/* </div> */}
+      {/* <div style={{ minWidth: `${width}`, minHeight: `${height}`, borderColor: "black", borderWidth: "1px", borderStyle: "solid", display: "inline-block" }}> */}
+        {GaugeMini({ value: 25 })}
+      {/* </div> */}
+      {/* <div style={{ minWidth: `${width}`, minHeight: `${height}`, borderColor: "black", borderWidth: "1px", borderStyle: "solid", display: "inline-block" }}> */}
+        {GaugeMini({ value: 50 })}
+      {/* </div> */}
+      {/* <div style={{ minWidth: `${width}`, minHeight: `${height}`, borderColor: "black", borderWidth: "1px", borderStyle: "solid", display: "inline-block" }}> */}
+        {GaugeMini({ value: 85 })}
+      {/* </div> */}
+      {/* <div style={{ minWidth: `${width}`, minHeight: `${height}`, borderColor: "black", borderWidth: "1px", borderStyle: "solid", display: "inline-block" }}> */}
+        {GaugeMini({ value: 96 })}
+      {/* </div> */}
+      {/* <div style={{ minWidth: `${width}`, minHeight: `${height}`, borderColor: "black", borderWidth: "1px", borderStyle: "solid", display: "inline-block" }}> */}
+        {GaugeMini({ value: 120 })}
+      {/* </div> */}
     </div>
   )
 }
