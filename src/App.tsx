@@ -7,7 +7,10 @@ import { scaleLinear } from "d3-scale";
 import { range } from "d3-array";
 
 import {InfluxColors} from "@influxdata/clockface";
-import {Gradients} from '@influxdata/clockface'
+
+// props
+const width = 200;
+const height = 100;
 
 type Color = {
   id: string
@@ -17,9 +20,6 @@ type Color = {
   value: number
 };
 
-// props
-const width = 200;
-const height = 100;
 
 const SvgBoxText: FunctionComponent<React.SVGProps<SVGTextElement> & { borderColor: string, borderWidth: number | string }> = (props) => {
   const { borderColor, borderWidth } = props;
@@ -93,8 +93,8 @@ const getColors = (theme: GaugeTheme): Colors => {
 
 const gaugeTheme: GaugeTheme = ({
   mode: "bullet",
-  valueHeight: 15,
-  gaugeHeight: 20,
+  valueHeight: 18,
+  gaugeHeight: 25,
   gaugePaddingSides: 20,
   colorsAndTargets: [
     { value: 8, type: "min", hex: InfluxColors.Topaz, ...({} as any) },
@@ -355,7 +355,7 @@ const App: FunctionComponent<any> = () => {
   useEffect(() => loop(), [val]);
 
   return (
-    <div className="App" style={{backgroundColor: InfluxColors.Castle, width:"100vw", height:"100vh"}}>
+    <div className="App" style={{backgroundColor: InfluxColors.Castle, width:"100vw", height:"100vh", overflow:"auto"}}>
       <GaugeMini value={val} theme={gaugeTheme} />
       <GaugeMini value={val} theme={gaugeTheme2} />
       <GaugeMini value={15} theme={gaugeTheme} />
