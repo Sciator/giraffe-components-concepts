@@ -31,6 +31,7 @@ const SvgBoxText: FunctionComponent<React.SVGProps<SVGTextElement> & { borderCol
   }, [])
 
   return <>
+    {/* 
     <rect
       style={{ stroke: borderColor, strokeWidth: borderWidth }}
       fill="none"
@@ -39,6 +40,7 @@ const SvgBoxText: FunctionComponent<React.SVGProps<SVGTextElement> & { borderCol
       x={textRect?.x}
       y={textRect?.y}
     />
+     */}
     <text
       {...props}
       ref={textRef}
@@ -97,13 +99,13 @@ const gaugeTheme: GaugeTheme = ({
     { value: 55, type: "threshold", hex: "#ffff00", ...({} as any) },
     { value: 82, type: "threshold", hex: "#00ff00", ...({} as any) },
 
-    // { value: 725, type: "target", hex: "#ff0000", ...({} as any) },
-    // { value: 312, type: "target", hex: "#ffff00", ...({} as any) },
+    { value: 55, type: "target", hex: "#ff0000", ...({} as any) },
+    { value: 82, type: "target", hex: "#ffff00", ...({} as any) },
 
     { value: 120, type: "max", hex: "#00ff00", ...({} as any) },
   ] as Color[],
   colorSecondary: "black",
-  textMode: "left",
+  textMode: "follow",
   textColorOutside: "white",
   textColorInside: "white",
   axesColor: "darkgray",
@@ -114,11 +116,12 @@ const gaugeTheme: GaugeTheme = ({
 const gaugeTheme2: GaugeTheme = {
   ...gaugeTheme,
   valueHeight: 20,
-  gaugeHeight: 10,
+  gaugeHeight: 20,
   mode: "progress",
-  colorsAndTargets: [gaugeTheme.colorsAndTargets[0], gaugeTheme.colorsAndTargets[gaugeTheme.colorsAndTargets.length-1]],
+  colorsAndTargets: [gaugeTheme.colorsAndTargets[0], gaugeTheme.colorsAndTargets[gaugeTheme.colorsAndTargets.length - 1]],
   textColorInside: "black",
-
+  textColorOutside: "black",
+  colorSecondary: "lightgray"
 };
 
 const throwReturn = <T extends unknown>(msg: string): T => {
@@ -279,7 +282,7 @@ const GaugeMini: FunctionComponent<{ value: number, theme: GaugeTheme }> = ({ va
         <GaugeText {...{ centerY, colors, gaugeBarValueWidth, theme, value }} />
       </g>
 
-      <g {...t(0, gaugeBarY + gaugeHeight + 5)}>
+      <g {...t(0, gaugeBarY + Math.max(gaugeHeight, valueHeight) + 5)}>
         <line x1={gaugePaddingSides} x2={gaugeBarWidth + gaugePaddingSides}
           style={axesLineStyle} />
         {range(axesSteps).map(x => {
@@ -303,29 +306,31 @@ const GaugeMini: FunctionComponent<{ value: number, theme: GaugeTheme }> = ({ va
           </>
         })}
       </g>
-      {colors.targets.map(({ value, hex }) => {
-        const posX = gaugeBarWidth * ((value - colors.min.value) / colorLen);
+      <g {...t(gaugePaddingSides, 0)}>
+        {colors.targets.map(({ value, hex }) => {
+          const posX = gaugeBarWidth * ((value - colors.min.value) / colorLen);
 
-        return <>
-          <line
-            style={{ stroke: hex, strokeWidth: "2px" }}
-            y1={gaugeBarY} y2={gaugeBarY + gaugeHeight}
-            x1={posX} x2={posX}
-          />
+          return <>
+            <line
+              style={{ stroke: hex, strokeWidth: "2px" }}
+              y1={gaugeBarY} y2={gaugeBarY + gaugeHeight}
+              x1={posX} x2={posX}
+            />
 
-          <SvgBoxText
-            borderColor={hex}
-            borderWidth="2px"
+            <SvgBoxText
+              borderColor={hex}
+              borderWidth="2px"
 
-            textAnchor="middle"
-            x={posX}
-            y={gaugeBarY}
-            style={{ borderColor: hex, borderStyle: "solid", borderWidth: "2px" }}
-          >
-            {value}
-          </SvgBoxText>
-        </>
-      })}
+              textAnchor="middle"
+              x={posX}
+              y={gaugeBarY}
+              style={{ borderColor: hex, borderStyle: "solid", borderWidth: "2px" }}
+            >
+              {value}
+            </SvgBoxText>
+          </>
+        })}
+      </g>
     </svg>
   )
 }
@@ -356,7 +361,7 @@ const App: FunctionComponent<any> = () => {
       <GaugeMini value={96} theme={gaugeTheme} />
       <GaugeMini value={120} theme={gaugeTheme} />
       <GaugeMini value={15} theme={gaugeTheme2} />
-      <GaugeMini value={25} theme={gaugeTheme2} />
+      <GaugeMini value={18} theme={gaugeTheme2} />
       <GaugeMini value={85} theme={gaugeTheme2} />
       <GaugeMini value={96} theme={gaugeTheme2} />
       <GaugeMini value={120} theme={gaugeTheme2} />
