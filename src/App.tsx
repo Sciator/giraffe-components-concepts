@@ -1,15 +1,17 @@
-import React, { useState, useEffect, FunctionComponent, useRef } from 'react'
+import React, { useState, useEffect, FunctionComponent, useRef } from "react"
 
-import './App.css'
+import "./App.css"
 
-import { color as d3Color } from 'd3-color';
-import { scaleLinear } from 'd3-scale';
+import { color as d3Color } from "d3-color";
+import { scaleLinear } from "d3-scale";
 import { range } from "d3-array";
 
+import {InfluxColors} from "@influxdata/clockface";
+import {Gradients} from '@influxdata/clockface'
 
 type Color = {
   id: string
-  type: 'min' | 'max' | 'threshold' | 'scale' | 'text' | 'background' | 'target'
+  type: "min" | "max" | "threshold" | "scale" | "text" | "background" | "target"
   hex: string
   name: string
   value: number
@@ -43,6 +45,7 @@ const SvgBoxText: FunctionComponent<React.SVGProps<SVGTextElement> & { borderCol
      */}
     <text
       {...props}
+      fill={InfluxColors.Platinum}
       ref={textRef}
     />
   </>
@@ -77,7 +80,7 @@ type Colors = {
 const getColors = (theme: GaugeTheme): Colors => {
   const { colorSecondary: secondary, colorsAndTargets } = theme;
 
-  colorsAndTargets.forEach(({ hex, name }) => d3Color(hex) ?? throwReturn(`Object "${hex}" isn't valid color for name:${name}`))
+  colorsAndTargets.forEach(({ hex, name }) => d3Color(hex) ?? throwReturn(`Object "${hex}" isn"t valid color for name:${name}`))
 
   const min: Color = colorsAndTargets.find(x => x.type === "min") ?? throwReturn("color of type min must be defined");
   const max: Color = colorsAndTargets.find(x => x.type === "max") ?? throwReturn("color of type max must be defined");
@@ -90,26 +93,26 @@ const getColors = (theme: GaugeTheme): Colors => {
 
 const gaugeTheme: GaugeTheme = ({
   mode: "bullet",
-  valueHeight: 16,
-  gaugeHeight: 25,
+  valueHeight: 15,
+  gaugeHeight: 20,
   gaugePaddingSides: 20,
   colorsAndTargets: [
-    { value: 8, type: "min", hex: "#ff0000", ...({} as any) },
+    { value: 8, type: "min", hex: InfluxColors.Topaz, ...({} as any) },
 
-    { value: 55, type: "threshold", hex: "#ffff00", ...({} as any) },
-    { value: 82, type: "threshold", hex: "#00ff00", ...({} as any) },
+    { value: 55, type: "threshold", hex: InfluxColors.Sulfur, ...({} as any) },
+    { value: 82, type: "threshold", hex: InfluxColors.Krypton, ...({} as any) },
 
-    { value: 55, type: "target", hex: "#ff0000", ...({} as any) },
-    { value: 82, type: "target", hex: "#ffff00", ...({} as any) },
+    // { value: 55, type: "target", hex: InfluxColors.Sulfur, ...({} as any) },
+    // { value: 82, type: "target", hex: InfluxColors.Krypton, ...({} as any) },
 
-    { value: 120, type: "max", hex: "#00ff00", ...({} as any) },
+    { value: 120, type: "max", hex: InfluxColors.Krypton, ...({} as any) },
   ] as Color[],
-  colorSecondary: "black",
-  textMode: "follow",
-  textColorOutside: "white",
-  textColorInside: "white",
-  axesColor: "darkgray",
-  axesSteps: 4,
+  colorSecondary: InfluxColors.Raven,
+  textMode: "left",
+  textColorOutside: InfluxColors.Cloud,
+  textColorInside: InfluxColors.Cloud,
+  axesColor: InfluxColors.Cloud,
+  axesSteps: 6,
   axesStrokeWidth: "2px",
 })
 
@@ -119,9 +122,9 @@ const gaugeTheme2: GaugeTheme = {
   gaugeHeight: 20,
   mode: "progress",
   colorsAndTargets: [gaugeTheme.colorsAndTargets[0], gaugeTheme.colorsAndTargets[gaugeTheme.colorsAndTargets.length - 1]],
-  textColorInside: "black",
-  textColorOutside: "black",
-  colorSecondary: "lightgray"
+  textColorInside: InfluxColors.Raven,
+  textColorOutside: InfluxColors.Raven,
+  colorSecondary: InfluxColors.Chromium
 };
 
 const throwReturn = <T extends unknown>(msg: string): T => {
@@ -313,7 +316,7 @@ const GaugeMini: FunctionComponent<{ value: number, theme: GaugeTheme }> = ({ va
           return <>
             <line
               style={{ stroke: hex, strokeWidth: "2px" }}
-              y1={gaugeBarY} y2={gaugeBarY + gaugeHeight}
+              y1={gaugeBarY - 8} y2={gaugeBarY + gaugeHeight}
               x1={posX} x2={posX}
             />
 
@@ -323,7 +326,7 @@ const GaugeMini: FunctionComponent<{ value: number, theme: GaugeTheme }> = ({ va
 
               textAnchor="middle"
               x={posX}
-              y={gaugeBarY}
+              y={gaugeBarY - 10}
               style={{ borderColor: hex, borderStyle: "solid", borderWidth: "2px" }}
             >
               {value}
@@ -352,7 +355,7 @@ const App: FunctionComponent<any> = () => {
   useEffect(() => loop(), [val]);
 
   return (
-    <div className="App" style={{}}>
+    <div className="App" style={{backgroundColor: InfluxColors.Castle, width:"100vw", height:"100vh"}}>
       <GaugeMini value={val} theme={gaugeTheme} />
       <GaugeMini value={val} theme={gaugeTheme2} />
       <GaugeMini value={15} theme={gaugeTheme} />

@@ -1239,6 +1239,11 @@
   dependencies:
     "@hapi/hoek" "^8.3.0"
 
+"@influxdata/clockface@^2.3.5":
+  version "2.3.5"
+  resolved "https://registry.yarnpkg.com/@influxdata/clockface/-/clockface-2.3.5.tgz#0af1a6a77b30235b39c97e527c32503b406d55de"
+  integrity sha512-l2ArlDCs7O+Af8xp+81a3Zs1FD77Dr4c66L40TgZsIfxveTRD9F0SDkhFQL+X+t0WoPBP/2nQlpAZL8AUl3l6w==
+
 "@influxdata/giraffe@^0.37.0":
   version "0.37.0"
   resolved "https://registry.yarnpkg.com/@influxdata/giraffe/-/giraffe-0.37.0.tgz#3707db58b54715b16978e245cbe25c3aeb4a45db"
