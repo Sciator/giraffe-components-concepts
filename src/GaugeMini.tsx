@@ -3,6 +3,7 @@ import React, { FunctionComponent, useEffect, useRef, useState } from "react";
 import { color as d3Color } from "d3-color";
 import { scaleLinear } from "d3-scale";
 import { range } from "d3-array";
+import { t } from "./shorthands";
 
 export type Color = {
   id: string
@@ -15,7 +16,7 @@ export type Color = {
 interface Props {
   width: number,
   height: number,
-  value: number,
+  value: number | { _field: string, value: number }[],
   theme: GaugeTheme,
 }
 
@@ -64,12 +65,13 @@ const throwReturn = <T extends unknown>(msg: string): T => {
   throw new Error(msg);
 }
 
-const GaugeBarBackground: FunctionComponent<{
+// todo: bullet mode background has to overlap, or page backgroud will make fake borders for all thresholds
+const BarBackground: FunctionComponent<{
   theme: GaugeTheme,
   colors: Colors,
-  gaugeBarWidth: number,
+  barWidth: number,
   getFrac: (x: number) => number,
-}> = ({ theme, colors: { max, min, secondary, thresholds }, gaugeBarWidth, getFrac }) => {
+}> = ({ theme, colors: { max, min, secondary, thresholds }, barWidth, getFrac }) => {
   const { gaugeHeight, mode } = theme;
 
   const colors: { start: number, end: number, col: string }[] = [];
@@ -91,12 +93,12 @@ const GaugeBarBackground: FunctionComponent<{
 
   return <>
     {colors.map(({ col, end, start }) =>
-      <rect height={gaugeHeight} x={gaugeBarWidth * start} width={gaugeBarWidth * (end - start)} fill={col} />
+      <rect height={gaugeHeight} x={barWidth * start} width={barWidth * (end - start)} fill={col} />
     )}
   </>
 }
 
-const GaugeBarValue: FunctionComponent<{
+const BarValue: FunctionComponent<{
   theme: GaugeTheme,
   gaugeBarValueWidth: number,
   colors: Colors,
@@ -137,7 +139,39 @@ const GaugeBarValue: FunctionComponent<{
   </>;
 }
 
-const GaugeText: FunctionComponent<{
+const Bar: FunctionComponent<{ value: number, theme: GaugeTheme, barWidth: number, centerY: number }> = ({
+  value,
+  theme,
+  centerY,
+  barWidth,
+}) => {
+  const { gaugeHeight, gaugePaddingSides } = theme;
+
+  const colors = getColors(theme);
+
+  const colorLen = (colors.max.value - colors.min.value);
+
+  const valueFrac = ((value - colors.min.value) / colorLen);
+
+  const gaugeBarY = centerY - (gaugeHeight / 2);
+  const gaugeBarValueWidth = barWidth * valueFrac;
+
+  /** return value as fraction 0->min 1->max */
+  const getFrac = (val: number): number =>
+    (val - colors.min.value) / colorLen
+    ;
+  return <>
+    <g {...t(gaugePaddingSides, gaugeBarY)}>
+      <BarBackground {...{ colors, barWidth, theme, getFrac }} />
+      <BarValue {...{ colors, gaugeBarValueWidth, theme, value }} />
+    </g>
+    <g {...t(gaugePaddingSides, centerY)}>
+      <Text {...{ centerY, colors, gaugeBarValueWidth, theme, value }} />
+    </g>
+  </>;
+}
+
+const Text: FunctionComponent<{
   theme: GaugeTheme,
   gaugeBarValueWidth: number,
   colors: Colors,
@@ -177,6 +211,7 @@ const GaugeText: FunctionComponent<{
   </>;
 }
 
+
 export const GaugeMini: FunctionComponent<Props> = ({ value, theme, width, height }) => {
   const { gaugeHeight, gaugePaddingSides, valueHeight } = theme;
 
@@ -186,40 +221,28 @@ export const GaugeMini: FunctionComponent<Props> = ({ value, theme, width, heigh
 
   const centerY = height / 2
 
-  const valueFrac = ((value - colors.min.value) / colorLen);
-
   const gaugeBarY = centerY - (gaugeHeight / 2);
-  const gaugeBarWidth = width - gaugePaddingSides * 2;
-  const gaugeBarValueWidth = gaugeBarWidth * valueFrac;
+  const barWidth = width - gaugePaddingSides * 2;
 
   const { axesColor, axesSteps, axesStrokeWidth } = theme;
 
   const axesLineStyle = { stroke: axesColor, strokeWidth: axesStrokeWidth };
 
-  const t = (x: number, y: number) => ({
-    transform: `translate(${x},${y})`
-  })
-
-  /** return value as fraction 0->min 1->max */
-  const getFrac = (val: number): number =>
-    (val - colors.min.value) / colorLen
-    ;
-
   return (
     <svg width={width} height={height}>
-      <g {...t(gaugePaddingSides, gaugeBarY)}>
-        <GaugeBarBackground {...{ colors, gaugeBarWidth, theme, getFrac }} />
-        <GaugeBarValue {...{ colors, gaugeBarValueWidth, theme, value }} />
-      </g>
-      <g {...t(gaugePaddingSides, centerY)}>
-        <GaugeText {...{ centerY, colors, gaugeBarValueWidth, theme, value }} />
-      </g>
-
+      {
+        (Array.isArray(value) ? value : [{ _field: "_default", value }])
+          .map(({ _field, value }) => {
+            return <>
+              <Bar {...{ barWidth, centerY, theme, value, }} />
+            </>;
+          })
+      }
       <g {...t(0, gaugeBarY + Math.max(gaugeHeight, valueHeight) + 5)}>
-        <line x1={gaugePaddingSides} x2={gaugeBarWidth + gaugePaddingSides}
+        <line x1={gaugePaddingSides} x2={barWidth + gaugePaddingSides}
           style={axesLineStyle} />
         {range(axesSteps).map(x => {
-          const posX = gaugeBarWidth * x / (axesSteps - 1) + gaugePaddingSides;
+          const posX = barWidth * x / (axesSteps - 1) + gaugePaddingSides;
           const value = colorLen * x / (axesSteps - 1) + colors.min.value;
 
           return <>
@@ -241,7 +264,7 @@ export const GaugeMini: FunctionComponent<Props> = ({ value, theme, width, heigh
       </g>
       <g {...t(gaugePaddingSides, 0)}>
         {colors.targets.map(({ value, hex }) => {
-          const posX = gaugeBarWidth * ((value - colors.min.value) / colorLen);
+          const posX = barWidth * ((value - colors.min.value) / colorLen);
 
           return <>
             <line
