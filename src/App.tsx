@@ -1,12 +1,10 @@
 import React, { useState, useEffect, FunctionComponent, useRef } from "react"
 
-import "./App.css"
-
 import { color as d3Color } from "d3-color";
 import { scaleLinear } from "d3-scale";
 import { range } from "d3-array";
 
-import {InfluxColors} from "@influxdata/clockface";
+import { InfluxColors } from "@influxdata/clockface";
 
 // props
 const width = 200;
@@ -355,7 +353,13 @@ const App: FunctionComponent<any> = () => {
   useEffect(() => loop(), [val]);
 
   return (
-    <div className="App" style={{backgroundColor: InfluxColors.Castle, width:"100vw", height:"100vh", overflow:"auto"}}>
+    <div className="App" style={{
+      backgroundColor: InfluxColors.Castle,
+      width: "100vw",
+      height: "100vh",
+      overflow: "auto",
+      textAlign: "center",
+    }}>
       <GaugeMini value={val} theme={gaugeTheme} />
       <GaugeMini value={val} theme={gaugeTheme2} />
       <GaugeMini value={15} theme={gaugeTheme} />
