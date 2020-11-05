@@ -3,8 +3,6 @@ import React, { FunctionComponent, useEffect, useRef, useState } from "react";
 import { color as d3Color } from "d3-color";
 import { scaleLinear } from "d3-scale";
 import { range } from "d3-array";
-import { InfluxColors } from "@influxdata/clockface";
-
 
 export type Color = {
   id: string
@@ -46,35 +44,6 @@ export type Colors = {
   thresholds: Color[],
   targets: Color[],
 }
-
-
-const SvgBoxText: FunctionComponent<React.SVGProps<SVGTextElement> & { borderColor: string, borderWidth: number | string }> = (props) => {
-  const { borderColor, borderWidth } = props;
-
-  const textRef = useRef<SVGTextElement>(null);
-
-  const [textRect, setTextRect] = useState<SVGRect | null>(null);
-
-  useEffect(() => {
-    setTextRect(textRef.current?.getBBox() as SVGRect)
-  }, [])
-
-  return <>
-    {/* 
-    <rect
-      style={{ stroke: borderColor, strokeWidth: borderWidth }}
-      fill="none"
-      width={textRect?.width}
-      height={(textRect?.height || 0) - 2}
-      x={textRect?.x}
-      y={textRect?.y}
-    />
-     */}
-
-  </>
-}
-
-
 
 export const getColors = (theme: GaugeTheme): Colors => {
   const { colorSecondary: secondary, colorsAndTargets } = theme;
@@ -281,17 +250,14 @@ export const GaugeMini: FunctionComponent<Props> = ({ value, theme, width, heigh
               x1={posX} x2={posX}
             />
 
-            <SvgBoxText
-              borderColor={hex}
-              borderWidth="2px"
-
+            <text
               textAnchor="middle"
               x={posX}
               y={gaugeBarY - 10}
               style={{ borderColor: hex, borderStyle: "solid", borderWidth: "2px" }}
             >
               {value}
-            </SvgBoxText>
+            </text>
           </>
         })}
       </g>
