@@ -139,10 +139,10 @@ const BarValue: FunctionComponent<{
   </>;
 }
 
-const Bar: FunctionComponent<{ value: number, theme: GaugeTheme, barWidth: number, centerY: number }> = ({
+const Bar: FunctionComponent<{ value: number, theme: GaugeTheme, barWidth: number, yCenter: number }> = ({
   value,
   theme,
-  centerY,
+  yCenter: centerY,
   barWidth,
 }) => {
   const { gaugeHeight, gaugePaddingSides } = theme;
@@ -211,6 +211,49 @@ const Text: FunctionComponent<{
   </>;
 }
 
+const Axes: FunctionComponent<{ theme: GaugeTheme, barWidth: number, y: number }> = ({
+  theme,
+  barWidth,
+  y,
+}) => {
+  const { gaugePaddingSides } = theme;
+
+  const colors = getColors(theme);
+
+  const colorLen = (colors.max.value - colors.min.value);
+
+  const { axesColor, axesSteps, axesStrokeWidth } = theme;
+
+  const axesLineStyle = { stroke: axesColor, strokeWidth: axesStrokeWidth };
+
+  return <>
+    <g {...t(0, y)}>
+      <line x1={gaugePaddingSides} x2={barWidth + gaugePaddingSides}
+        style={axesLineStyle} />
+      {range(axesSteps).map(x => {
+        const posX = barWidth * x / (axesSteps - 1) + gaugePaddingSides;
+        const value = colorLen * x / (axesSteps - 1) + colors.min.value;
+
+        return <>
+          <g {...t(posX, 5)} >
+            <line
+              y1={-5}
+              style={axesLineStyle}
+            />
+            <text
+              textAnchor="middle"
+              alignmentBaseline="hanging"
+              fill={axesColor}
+            >
+              {value.toFixed(0)}
+            </text>
+          </g>
+        </>
+      })}
+    </g>
+  </>;
+}
+
 
 export const GaugeMini: FunctionComponent<Props> = ({ value, theme, width, height }) => {
   const { gaugeHeight, gaugePaddingSides, valueHeight } = theme;
@@ -234,34 +277,11 @@ export const GaugeMini: FunctionComponent<Props> = ({ value, theme, width, heigh
         (Array.isArray(value) ? value : [{ _field: "_default", value }])
           .map(({ _field, value }) => {
             return <>
-              <Bar {...{ barWidth, centerY, theme, value, }} />
+              <Bar {...{ barWidth, yCenter: centerY, theme, value, }} />
             </>;
           })
       }
-      <g {...t(0, gaugeBarY + Math.max(gaugeHeight, valueHeight) + 5)}>
-        <line x1={gaugePaddingSides} x2={barWidth + gaugePaddingSides}
-          style={axesLineStyle} />
-        {range(axesSteps).map(x => {
-          const posX = barWidth * x / (axesSteps - 1) + gaugePaddingSides;
-          const value = colorLen * x / (axesSteps - 1) + colors.min.value;
-
-          return <>
-            <g {...t(posX, 5)} >
-              <line
-                y1={-5}
-                style={axesLineStyle}
-              />
-              <text
-                textAnchor="middle"
-                alignmentBaseline="hanging"
-                fill={axesColor}
-              >
-                {value.toFixed(0)}
-              </text>
-            </g>
-          </>
-        })}
-      </g>
+      <Axes {...{ barWidth, theme, value, y: gaugeBarY + Math.max(gaugeHeight, valueHeight) + 5 }} />
       <g {...t(gaugePaddingSides, 0)}>
         {colors.targets.map(({ value, hex }) => {
           const posX = barWidth * ((value - colors.min.value) / colorLen);
