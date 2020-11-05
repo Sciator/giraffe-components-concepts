@@ -36,6 +36,7 @@ export interface GaugeTheme {
   axesColor: TColor;
   axesStrokeWidth: string | number;
   axesSteps: number;
+  barPaddings: number;
 }
 
 export type Colors = {
@@ -139,13 +140,13 @@ const BarValue: FunctionComponent<{
   </>;
 }
 
-const Bar: FunctionComponent<{ value: number, theme: GaugeTheme, barWidth: number, yCenter: number }> = ({
+const Bar: FunctionComponent<{ value: number, theme: GaugeTheme, barWidth: number, y: number }> = ({
   value,
   theme,
-  yCenter: centerY,
+  y,
   barWidth,
 }) => {
-  const { gaugeHeight, gaugePaddingSides } = theme;
+  const { gaugeHeight, gaugePaddingSides, valueHeight } = theme;
 
   const colors = getColors(theme);
 
@@ -153,20 +154,22 @@ const Bar: FunctionComponent<{ value: number, theme: GaugeTheme, barWidth: numbe
 
   const valueFrac = ((value - colors.min.value) / colorLen);
 
-  const gaugeBarY = centerY - (gaugeHeight / 2);
+  const gaugeBarY = y;
   const gaugeBarValueWidth = barWidth * valueFrac;
+  const maxBarHeight = Math.max(gaugeHeight, valueHeight);
+  const textCenter = y + maxBarHeight / 2
 
   /** return value as fraction 0->min 1->max */
   const getFrac = (val: number): number =>
     (val - colors.min.value) / colorLen
     ;
   return <>
-    <g {...t(gaugePaddingSides, gaugeBarY)}>
+    <g {...t(0, gaugeBarY)}>
       <BarBackground {...{ colors, barWidth, theme, getFrac }} />
       <BarValue {...{ colors, gaugeBarValueWidth, theme, value }} />
     </g>
-    <g {...t(gaugePaddingSides, centerY)}>
-      <Text {...{ centerY, colors, gaugeBarValueWidth, theme, value }} />
+    <g {...t(0, textCenter)}>
+      <Text {...{ centerY: y, colors, gaugeBarValueWidth, theme, value }} />
     </g>
   </>;
 }
@@ -211,12 +214,19 @@ const Text: FunctionComponent<{
   </>;
 }
 
+const getIndexPos = (arrLen: number, i: number) => {
+  return {
+    isLast: i === arrLen - 1,
+    isFirst: i === 0,
+  }
+}
+
 const Axes: FunctionComponent<{ theme: GaugeTheme, barWidth: number, y: number }> = ({
   theme,
   barWidth,
   y,
 }) => {
-  const { gaugePaddingSides } = theme;
+  const { } = theme;
 
   const colors = getColors(theme);
 
@@ -228,20 +238,30 @@ const Axes: FunctionComponent<{ theme: GaugeTheme, barWidth: number, y: number }
 
   return <>
     <g {...t(0, y)}>
-      <line x1={gaugePaddingSides} x2={barWidth + gaugePaddingSides}
+      <line x2={barWidth}
         style={axesLineStyle} />
-      {range(axesSteps).map(x => {
-        const posX = barWidth * x / (axesSteps - 1) + gaugePaddingSides;
+      {range(axesSteps).map((x, i) => {
+        const posX = barWidth * x / (axesSteps - 1);
         const value = colorLen * x / (axesSteps - 1) + colors.min.value;
 
+        const { isFirst, isLast } = getIndexPos(axesSteps, i);
+        const anchor =
+          (isFirst && "start")
+          || (isLast && "end")
+          || "middle"
+
+        const isSide = isFirst || isLast;
+        const lineLength = isSide ? 3 : 5;
+
         return <>
-          <g {...t(posX, 5)} >
+          <g {...t(posX, 0)} >
             <line
-              y1={-5}
+              y2={lineLength}
               style={axesLineStyle}
             />
             <text
-              textAnchor="middle"
+              y={5}
+              textAnchor={anchor}
               alignmentBaseline="hanging"
               fill={axesColor}
             >
@@ -254,56 +274,82 @@ const Axes: FunctionComponent<{ theme: GaugeTheme, barWidth: number, y: number }
   </>;
 }
 
+const AutoCenterGroup: FunctionComponent<{ enabled?: boolean }> = ({ children, enabled = true }) => {
+  const ref = useRef<SVGGElement>(null);
+
+  const [x, setX] = useState(0);
+  const [y, setY] = useState(0);
+
+  const [refr, setRefr] = useState(0);
+  const refresh = () => setRefr(refr + 1);
+
+  useEffect(() => {
+    if (!enabled)
+      return;
+
+    const g = ref.current!;
+    const box = g.getBoundingClientRect();
+    const boxParent = g.parentElement!.getBoundingClientRect();
+
+    setX((boxParent.width - box.width) / 2);
+    setY((boxParent.height - box.height) / 2);
+  }, [refr])
+
+  return <g ref={ref} {...t(x, y)}>
+    {children}
+  </g>
+}
 
 export const GaugeMini: FunctionComponent<Props> = ({ value, theme, width, height }) => {
-  const { gaugeHeight, gaugePaddingSides, valueHeight } = theme;
+  const { gaugeHeight, gaugePaddingSides, valueHeight, barPaddings } = theme;
+
+  const valueArray = Array.isArray(value) ? value : [{ _field: "_default", value }];
 
   const colors = getColors(theme);
-
   const colorLen = (colors.max.value - colors.min.value);
-
   const centerY = height / 2
 
   const gaugeBarY = centerY - (gaugeHeight / 2);
   const barWidth = width - gaugePaddingSides * 2;
 
-  const { axesColor, axesSteps, axesStrokeWidth } = theme;
+  const maxBarHeight = Math.max(gaugeHeight, valueHeight);
 
-  const axesLineStyle = { stroke: axesColor, strokeWidth: axesStrokeWidth };
+  const allBarsHeight = valueArray.length * (maxBarHeight + barPaddings);
 
   return (
     <svg width={width} height={height}>
-      {
-        (Array.isArray(value) ? value : [{ _field: "_default", value }])
-          .map(({ _field, value }) => {
-            return <>
-              <Bar {...{ barWidth, yCenter: centerY, theme, value, }} />
-            </>;
-          })
-      }
-      <Axes {...{ barWidth, theme, value, y: gaugeBarY + Math.max(gaugeHeight, valueHeight) + 5 }} />
-      <g {...t(gaugePaddingSides, 0)}>
-        {colors.targets.map(({ value, hex }) => {
-          const posX = barWidth * ((value - colors.min.value) / colorLen);
+      <AutoCenterGroup enabled={true}>
+        {valueArray.map(({ _field, value }, i) => {
+          const centerY = 0 + i * (maxBarHeight + barPaddings);
 
           return <>
-            <line
-              style={{ stroke: hex, strokeWidth: "2px" }}
-              y1={gaugeBarY - 8} y2={gaugeBarY + gaugeHeight}
-              x1={posX} x2={posX}
-            />
-
-            <text
-              textAnchor="middle"
-              x={posX}
-              y={gaugeBarY - 10}
-              style={{ borderColor: hex, borderStyle: "solid", borderWidth: "2px" }}
-            >
-              {value}
-            </text>
-          </>
+            <Bar {...{ barWidth, y: centerY, theme, value, }} />
+          </>;
         })}
-      </g>
+        <Axes {...{ barWidth, theme, value, y: allBarsHeight }} />
+        <g {...t(gaugePaddingSides, 0)}>
+          {colors.targets.map(({ value, hex }) => {
+            const posX = barWidth * ((value - colors.min.value) / colorLen);
+
+            return <>
+              <line
+                style={{ stroke: hex, strokeWidth: "2px" }}
+                y1={gaugeBarY - 8} y2={gaugeBarY + gaugeHeight}
+                x1={posX} x2={posX}
+              />
+
+              <text
+                textAnchor="middle"
+                x={posX}
+                y={gaugeBarY - 10}
+                style={{ borderColor: hex, borderStyle: "solid", borderWidth: "2px" }}
+              >
+                {value}
+              </text>
+            </>
+          })}
+        </g>
+      </AutoCenterGroup>
     </svg>
   )
 }

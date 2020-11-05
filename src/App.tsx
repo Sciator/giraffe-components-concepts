@@ -3,8 +3,8 @@ import React, { useState, useEffect, FunctionComponent, useRef } from "react"
 import { InfluxColors } from "@influxdata/clockface";
 import { GaugeMini, GaugeTheme, getColors, Color } from "./GaugeMini";
 
-const width = 200;
-const height = 100;
+const width = 300;
+const height = 200;
 
 const gaugeTheme: GaugeTheme = ({
   mode: "bullet",
@@ -29,6 +29,7 @@ const gaugeTheme: GaugeTheme = ({
   axesColor: InfluxColors.Cloud,
   axesSteps: 6,
   axesStrokeWidth: "2px",
+  barPaddings: 5,
 })
 
 const gaugeTheme2: GaugeTheme = {
@@ -68,6 +69,12 @@ const App: FunctionComponent<any> = () => {
     }}>
       <GaugeMini value={val} theme={gaugeTheme} {...{ width, height }} />
       <GaugeMini value={val} theme={gaugeTheme2} {...{ width, height }} />
+      <GaugeMini value={[
+        {_field:"f1", value:15},
+        {_field:"f2", value:25},
+        {_field:"f3", value:96},
+        {_field:"f4", value:120},
+      ]} theme={gaugeTheme2} {...{ width, height }} />
       <GaugeMini value={15} theme={gaugeTheme} {...{ width, height }} />
       <GaugeMini value={25} theme={gaugeTheme} {...{ width, height }} />
       <GaugeMini value={85} theme={gaugeTheme} {...{ width, height }} />
