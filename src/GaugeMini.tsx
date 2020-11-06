@@ -133,7 +133,7 @@ const BarValue: FunctionComponent<{
         }
       })()
     )!
-      .brighter(1.5)
+      .brighter(1)
       .formatHex()
     ;
 

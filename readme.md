@@ -7,4 +7,9 @@ To run:
 
 Current state:
  - 04-11-2020
- ![example-state-4-11-2020](./images/example-state-4-11-2020.jpg)
+ ![example-state-4-11-2020](./images/example-state-04-11-2020.jpg)
+ - 06-11-2020
+ ![example-state-4-11-2020](./images/example-state-06-11-2020--label--multi-value.jpg)
+    - multiple value support
+    - main label
+    - _(new centering logic)_

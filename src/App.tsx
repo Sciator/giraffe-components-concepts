@@ -71,10 +71,14 @@ const App: FunctionComponent<any> = () => {
       <GaugeMini value={val} theme={gaugeTheme} {...{ width, height }} />
       <GaugeMini value={val} theme={gaugeTheme2} {...{ width, height }} />
       <GaugeMini value={[
-        {_field:"f1", value:15},
-        {_field:"f2", value:25},
-        {_field:"f3", value:96},
-        {_field:"f4", value:120},
+        { _field: "f3", value: 96 },
+        { _field: "f4", value: 120 },
+      ]} theme={gaugeTheme} {...{ width, height }} />
+      <GaugeMini value={[
+        { _field: "f1", value: 15 },
+        { _field: "f2", value: 25 },
+        { _field: "f3", value: 96 },
+        { _field: "f4", value: 120 },
       ]} theme={gaugeTheme2} {...{ width, height }} />
       <GaugeMini value={15} theme={gaugeTheme} {...{ width, height }} />
       <GaugeMini value={25} theme={gaugeTheme} {...{ width, height }} />
