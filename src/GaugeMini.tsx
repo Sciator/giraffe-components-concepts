@@ -223,6 +223,7 @@ const getIndexPos = (arrLen: number, i: number) => {
   }
 }
 
+// todo: Axes mode where numbers are shown at thresholds
 const Axes: FunctionComponent<{ theme: GaugeTheme, barWidth: number, y: number }> = ({
   theme,
   barWidth,
@@ -238,7 +239,6 @@ const Axes: FunctionComponent<{ theme: GaugeTheme, barWidth: number, y: number }
 
   const axesLineStyle = { stroke: axesColor, strokeWidth: axesStrokeWidth };
 
-  // todo: line endign style change
   return <>
     <g {...t(0, y)}>
       <line x2={barWidth}
@@ -263,7 +263,7 @@ const Axes: FunctionComponent<{ theme: GaugeTheme, barWidth: number, y: number }
               style={axesLineStyle}
             />
             <text
-              y={5}
+              y={8}
               textAnchor={anchor}
               alignmentBaseline="hanging"
               fill={axesColor}

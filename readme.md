@@ -6,10 +6,4 @@ To run:
  1. open [`localhost:3000`](http://localhost:3000) or start __vscode debug__
 
 Current state:
- - 04-11-2020
- ![example-state-4-11-2020](./images/example-state-04-11-2020.jpg)
- - 06-11-2020
- ![example-state-4-11-2020](./images/example-state-06-11-2020--label--multi-value.jpg)
-    - multiple value support
-    - main label
-    - _(new centering logic)_
+![01.jpg](./images/01.jpg)

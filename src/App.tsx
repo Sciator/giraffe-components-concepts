@@ -38,6 +38,7 @@ const gaugeTheme2: GaugeTheme = {
   valueHeight: 20,
   gaugeHeight: 20,
   mode: "progress",
+  textMode: "follow",
   colorsAndTargets: [gaugeTheme.colorsAndTargets[0], gaugeTheme.colorsAndTargets[gaugeTheme.colorsAndTargets.length - 1]],
   textColorBarInside: InfluxColors.Raven,
   textColorBarOutside: InfluxColors.Raven,
