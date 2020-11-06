@@ -41,7 +41,13 @@ const gaugeTheme2: GaugeTheme = {
   colorsAndTargets: [gaugeTheme.colorsAndTargets[0], gaugeTheme.colorsAndTargets[gaugeTheme.colorsAndTargets.length - 1]],
   textColorBarInside: InfluxColors.Raven,
   textColorBarOutside: InfluxColors.Raven,
-  colorSecondary: InfluxColors.Chromium
+  colorSecondary: InfluxColors.Chromium,
+  labelBars:[
+    { _field: "f1", label: "CPU 1" },
+    { _field: "f2", label: "CPU 2" },
+    { _field: "f3", label: "CPU 3" },
+    { _field: "f4", label: "CPU rest" },
+  ]
 };
 
 const App: FunctionComponent<any> = () => {

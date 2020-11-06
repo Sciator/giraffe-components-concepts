@@ -320,7 +320,7 @@ export const GaugeMini: FunctionComponent<Props> = ({ value, theme, width, heigh
   const allBarsHeight = valueArray.length * (maxBarHeight + barPaddings);
 
   return (
-    <svg width={width} height={height}>
+    <svg width={width} height={height} style={{fontFamily:"Rubik, monospace"}} >
       <AutoCenterGroup enabled={true}>
         {labelMain &&
           <text fill={textColor} y={-barPaddings*2}>
@@ -328,10 +328,13 @@ export const GaugeMini: FunctionComponent<Props> = ({ value, theme, width, heigh
           </text>
         }
         {valueArray.map(({ _field, value }, i) => {
-          const centerY = 0 + i * (maxBarHeight + barPaddings);
+          const y = 0 + i * (maxBarHeight + barPaddings);
+
+          const textCenter = y + maxBarHeight / 2
 
           return <>
-            <Bar {...{ barWidth, y: centerY, theme, value, }} />
+            <Bar {...{ barWidth, y, theme, value, }} />
+            {/* <text fill={textColor} y={textCenter} alignmentBaseline="central" textAnchor="end">aaaa</text> */}
           </>;
         })}
         <Axes {...{ barWidth, theme, value, y: allBarsHeight + barPaddings }} />
