@@ -24,12 +24,13 @@ const gaugeTheme: GaugeTheme = ({
   ] as Color[],
   colorSecondary: InfluxColors.Raven,
   textMode: "left",
-  textColorOutside: InfluxColors.Cloud,
-  textColorInside: InfluxColors.Cloud,
-  axesColor: InfluxColors.Cloud,
+  textColorBarOutside: InfluxColors.Cloud,
+  textColorBarInside: InfluxColors.Cloud,
+  textColor: InfluxColors.Cloud,
   axesSteps: 6,
   axesStrokeWidth: "2px",
   barPaddings: 5,
+  labelMain: "Processor usage",
 })
 
 const gaugeTheme2: GaugeTheme = {
@@ -38,8 +39,8 @@ const gaugeTheme2: GaugeTheme = {
   gaugeHeight: 20,
   mode: "progress",
   colorsAndTargets: [gaugeTheme.colorsAndTargets[0], gaugeTheme.colorsAndTargets[gaugeTheme.colorsAndTargets.length - 1]],
-  textColorInside: InfluxColors.Raven,
-  textColorOutside: InfluxColors.Raven,
+  textColorBarInside: InfluxColors.Raven,
+  textColorBarOutside: InfluxColors.Raven,
   colorSecondary: InfluxColors.Chromium
 };
 

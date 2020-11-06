@@ -28,13 +28,15 @@ export interface GaugeTheme {
   gaugeHeight: number;
   gaugePaddingSides: number;
   colorsAndTargets: Color[];
-  colorSecondary: TColor,
-  mode: "progress" | "bullet",
-  textMode: "follow" | "left",
-  textColorOutside: TColor
-  textColorInside: TColor
-  axesColor: TColor;
+  colorSecondary: TColor;
+  mode: "progress" | "bullet";
+  textMode: "follow" | "left";
+  textColor: TColor;
+  textColorBarOutside: TColor
+  textColorBarInside: TColor
   axesStrokeWidth: string | number;
+  labelMain?: string;
+  labelBars?: { _field: string, label: string }[];
   axesSteps: number;
   barPaddings: number;
 }
@@ -180,7 +182,7 @@ const Text: FunctionComponent<{
   colors: Colors,
   value: number,
 }> = ({ value, gaugeBarValueWidth, theme }) => {
-  const { textColorInside, textColorOutside, textMode } = theme;
+  const { textColorBarInside, textColorBarOutside, textMode } = theme;
   const textValue = ` ${(value).toFixed(0)} `
 
   const [textBBox, setTextBBox] = useState<SVGRect | null>(null);
@@ -198,8 +200,8 @@ const Text: FunctionComponent<{
     ;
 
   const textColor = textInside
-    ? textColorInside
-    : textColorOutside
+    ? textColorBarInside
+    : textColorBarOutside
     ;
 
   const x = textMode === "follow"
@@ -232,10 +234,11 @@ const Axes: FunctionComponent<{ theme: GaugeTheme, barWidth: number, y: number }
 
   const colorLen = (colors.max.value - colors.min.value);
 
-  const { axesColor, axesSteps, axesStrokeWidth } = theme;
+  const { textColor: axesColor, axesSteps, axesStrokeWidth } = theme;
 
   const axesLineStyle = { stroke: axesColor, strokeWidth: axesStrokeWidth };
 
+  // todo: line endign style change
   return <>
     <g {...t(0, y)}>
       <line x2={barWidth}
@@ -301,7 +304,7 @@ const AutoCenterGroup: FunctionComponent<{ enabled?: boolean }> = ({ children, e
 }
 
 export const GaugeMini: FunctionComponent<Props> = ({ value, theme, width, height }) => {
-  const { gaugeHeight, gaugePaddingSides, valueHeight, barPaddings } = theme;
+  const { gaugeHeight, gaugePaddingSides, valueHeight, barPaddings, labelMain, textColor } = theme;
 
   const valueArray = Array.isArray(value) ? value : [{ _field: "_default", value }];
 
@@ -319,6 +322,11 @@ export const GaugeMini: FunctionComponent<Props> = ({ value, theme, width, heigh
   return (
     <svg width={width} height={height}>
       <AutoCenterGroup enabled={true}>
+        {labelMain &&
+          <text fill={textColor} y={-barPaddings*2}>
+            {labelMain}
+          </text>
+        }
         {valueArray.map(({ _field, value }, i) => {
           const centerY = 0 + i * (maxBarHeight + barPaddings);
 
@@ -326,7 +334,7 @@ export const GaugeMini: FunctionComponent<Props> = ({ value, theme, width, heigh
             <Bar {...{ barWidth, y: centerY, theme, value, }} />
           </>;
         })}
-        <Axes {...{ barWidth, theme, value, y: allBarsHeight }} />
+        <Axes {...{ barWidth, theme, value, y: allBarsHeight + barPaddings }} />
         <g {...t(gaugePaddingSides, 0)}>
           {colors.targets.map(({ value, hex }) => {
             const posX = barWidth * ((value - colors.min.value) / colorLen);
