@@ -27,7 +27,7 @@ const gaugeTheme: IGaugeTheme = ({
   textColorBarOutside: InfluxColors.Cloud,
   textColorBarInside: InfluxColors.Cloud,
   textColor: InfluxColors.Cloud,
-  axesSteps: 6,
+  axesSteps: 4,
   axesStrokeWidth: "2px",
   barPaddings: 5,
   labelMain: "Processor usage",
@@ -79,11 +79,25 @@ const App: FunctionComponent<any> = () => {
       textAlign: "center",
     }}>
       <GaugeMini value={[
+        { _field: "f3", value: 96 },
+        { _field: "f4", value: 120 },
+      ]} theme={gaugeTheme} {...{ width, height }} />
+      <GaugeMini value={[
         { _field: "f1", value: 15 },
         { _field: "f2", value: 25 },
         { _field: "f3", value: 96 },
         { _field: "f4", value: 120 },
       ]} theme={gaugeTheme2} {...{ width, height }} />
+      <GaugeMini value={15} theme={gaugeTheme} {...{ width, height }} />
+      <GaugeMini value={25} theme={gaugeTheme} {...{ width, height }} />
+      <GaugeMini value={85} theme={gaugeTheme} {...{ width, height }} />
+      <GaugeMini value={96} theme={gaugeTheme} {...{ width, height }} />
+      <GaugeMini value={120} theme={gaugeTheme} {...{ width, height }} />
+      <GaugeMini value={15} theme={gaugeTheme2} {...{ width, height }} />
+      <GaugeMini value={18} theme={gaugeTheme2} {...{ width, height }} />
+      <GaugeMini value={85} theme={gaugeTheme2} {...{ width, height }} />
+      <GaugeMini value={96} theme={gaugeTheme2} {...{ width, height }} />
+      <GaugeMini value={120} theme={gaugeTheme2} {...{ width, height }} />
     </div>
   );
 };

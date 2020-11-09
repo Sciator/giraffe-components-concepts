@@ -50,6 +50,8 @@ export type Colors = {
   targets: Color[],
 };
 
+const nbsp = " ";
+
 export const getColors = (theme: IGaugeTheme): Colors => {
   const { colorSecondary: secondary, colorsAndTargets } = theme;
 
@@ -186,7 +188,7 @@ const Text: FunctionComponent<{
 }> = ({ value, gaugeBarValueWidth, theme }) => {
   const { textColorBarInside, textColorBarOutside, textMode } = theme;
   // todo: better padding style
-  const textValue = ` ${(value).toFixed(0)} `;
+  const textValue = nbsp + (value).toFixed(0) + nbsp;
 
   const [textBBox, setTextBBox] = useState<SVGRect | null>(null);
 
@@ -299,11 +301,8 @@ const AutoCenterGroup: FunctionComponent<{ enabled?: boolean, refreshToken?: num
     if (!box || !boxParent)
       return;
 
-    console.log({ box, boxParent });
-
     const boxCenterX = (box.width / 2) + box.x;
     const parentCenterX = boxParent.width / 2;
-    console.log({ boxCenterX, parentCenterX });
 
     setX((boxParent.width - box.width) / 2 - box.x);
     setY((boxParent.height - box.height) / 2 - box.y);
@@ -315,8 +314,8 @@ const AutoCenterGroup: FunctionComponent<{ enabled?: boolean, refreshToken?: num
 };
 
 export const GaugeMini: FunctionComponent<IProps> = ({ value, theme, width, height }) => {
-  const { gaugeHeight, gaugePaddingSides, valueHeight, barPaddings, labelMain, textColor } = theme;
-  const [barLabelsWidth, setBarLabelsWidth] = useState(0);
+  const { gaugeHeight, gaugePaddingSides, valueHeight, barPaddings, labelMain, labelBars, textColor } = theme;
+  const [barLabelsWidth] = useState<number[]>([]);
 
   const valueArray = Array.isArray(value) ? value : [{ _field: "_default", value }];
 
@@ -325,18 +324,17 @@ export const GaugeMini: FunctionComponent<IProps> = ({ value, theme, width, heig
   const centerY = height / 2;
 
   const gaugeBarY = centerY - (gaugeHeight / 2);
-  const barWidth = width - gaugePaddingSides * 2 - barLabelsWidth;
+  const barWidth = width - gaugePaddingSides * 2 - (Math.max(...barLabelsWidth) || 0);
 
   const maxBarHeight = Math.max(gaugeHeight, valueHeight);
 
   const allBarsHeight = valueArray.length * (maxBarHeight + barPaddings);
 
-  const updateBarLabelsWidth = (r: DOMRect) => setBarLabelsWidth(Math.max(r.width, barLabelsWidth));
-
-  const [autocenterToken, setAutocenterToken] = useState("");
+  const [autocenterToken, setAutocenterToken] = useState(0);
   useEffect(() => {
-    setAutocenterToken(JSON.stringify([barLabelsWidth, colors, gaugePaddingSides, valueHeight]));
-  }, [barLabelsWidth, colors, gaugePaddingSides, valueHeight]);
+    console.log("refr");
+    setAutocenterToken(autocenterToken + 1);
+  }, [barLabelsWidth, gaugePaddingSides, valueHeight]);
 
   return (
     <svg width={width} height={height} style={{ fontFamily: "Rubik, monospace" }} >
@@ -348,12 +346,16 @@ export const GaugeMini: FunctionComponent<IProps> = ({ value, theme, width, heig
         }
         {valueArray.map(({ _field, value }, i) => {
           const y = 0 + i * (maxBarHeight + barPaddings);
+          const label = labelBars?.find(({ _field: f }) => f === _field)?.label;
 
           const textCenter = y + maxBarHeight / 2;
 
+          // todo: no rerender ?
+          const onRectChanged = (r:DOMRect) => { barLabelsWidth[i] = r.width; };
+
           return <>
             <Bar {...{ barWidth, y, theme, value, }} />
-            <SvgTextRect onRectChanged={updateBarLabelsWidth} fill={textColor} y={textCenter} alignmentBaseline="central" textAnchor="end">aaaa</SvgTextRect>
+            <SvgTextRect onRectChanged={onRectChanged} fill={textColor} y={textCenter} alignmentBaseline="central" textAnchor="end">{label && (label + nbsp)}</SvgTextRect>
           </>;
         })}
         <Axes {...{ barWidth, theme, value, y: allBarsHeight + barPaddings }} />
