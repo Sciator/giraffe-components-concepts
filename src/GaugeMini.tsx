@@ -150,7 +150,7 @@ const Bar: FunctionComponent<{ value: number, theme: IGaugeTheme, barWidth: numb
   y,
   barWidth,
 }) => {
-  const { gaugeHeight, gaugePaddingSides, valueHeight } = theme;
+  const { gaugeHeight, valueHeight } = theme;
 
   const colors = getColors(theme);
 
@@ -277,29 +277,37 @@ const Axes: FunctionComponent<{ theme: IGaugeTheme, barWidth: number, y: number 
   </>;
 };
 
-const AutoCenterGroup: FunctionComponent<{ enabled?: boolean }> = ({ children, enabled = true }) => {
+const AutoCenterGroup: FunctionComponent<{ enabled?: boolean, refreshToken?: number | string }> = ({ children, enabled = true, refreshToken = 0 }) => {
   const ref = useRef<SVGGElement>(null);
 
   const [x, setX] = useState(0);
   const [y, setY] = useState(0);
 
-  const [refr, setRefr] = useState(0);
-  const refresh = () => setRefr(refr + 1);
-
   useEffect(() => {
-    if (!enabled)
+    if (!enabled) {
+      setX(0);
+      setY(0);
       return;
+    }
 
     const g = ref.current;
-    const box = g?.getBoundingClientRect();
-    const boxParent = g?.parentElement?.getBoundingClientRect();
+    // we use this function because we want to know how much we are in negative direction
+    const box = g?.getBBox();
+    // we use this function because we want to have fixed parent width/height
+    const boxParent = (g?.parentElement as SVGGraphicsElement | undefined)?.getBoundingClientRect();
 
     if (!box || !boxParent)
       return;
 
-    setX((boxParent.width - box.width) / 2);
-    setY((boxParent.height - box.height) / 2);
-  }, [refr]);
+    console.log({ box, boxParent });
+
+    const boxCenterX = (box.width / 2) + box.x;
+    const parentCenterX = boxParent.width / 2;
+    console.log({ boxCenterX, parentCenterX });
+
+    setX((boxParent.width - box.width) / 2 - box.x);
+    setY((boxParent.height - box.height) / 2 - box.y);
+  }, [refreshToken]);
 
   return <g ref={ref} {...t(x, y)}>
     {children}
@@ -308,6 +316,7 @@ const AutoCenterGroup: FunctionComponent<{ enabled?: boolean }> = ({ children, e
 
 export const GaugeMini: FunctionComponent<IProps> = ({ value, theme, width, height }) => {
   const { gaugeHeight, gaugePaddingSides, valueHeight, barPaddings, labelMain, textColor } = theme;
+  const [barLabelsWidth, setBarLabelsWidth] = useState(0);
 
   const valueArray = Array.isArray(value) ? value : [{ _field: "_default", value }];
 
@@ -316,15 +325,22 @@ export const GaugeMini: FunctionComponent<IProps> = ({ value, theme, width, heig
   const centerY = height / 2;
 
   const gaugeBarY = centerY - (gaugeHeight / 2);
-  const barWidth = width - gaugePaddingSides * 2;
+  const barWidth = width - gaugePaddingSides * 2 - barLabelsWidth;
 
   const maxBarHeight = Math.max(gaugeHeight, valueHeight);
 
   const allBarsHeight = valueArray.length * (maxBarHeight + barPaddings);
 
+  const updateBarLabelsWidth = (r: DOMRect) => setBarLabelsWidth(Math.max(r.width, barLabelsWidth));
+
+  const [autocenterToken, setAutocenterToken] = useState("");
+  useEffect(() => {
+    setAutocenterToken(JSON.stringify([barLabelsWidth, colors, gaugePaddingSides, valueHeight]));
+  }, [barLabelsWidth, colors, gaugePaddingSides, valueHeight]);
+
   return (
     <svg width={width} height={height} style={{ fontFamily: "Rubik, monospace" }} >
-      <AutoCenterGroup enabled={true}>
+      <AutoCenterGroup enabled={true} refreshToken={autocenterToken}>
         {labelMain &&
           <text fill={textColor} y={-barPaddings * 2}>
             {labelMain}
@@ -337,7 +353,7 @@ export const GaugeMini: FunctionComponent<IProps> = ({ value, theme, width, heig
 
           return <>
             <Bar {...{ barWidth, y, theme, value, }} />
-            {/* <text fill={textColor} y={textCenter} alignmentBaseline="central" textAnchor="end">aaaa</text> */}
+            <SvgTextRect onRectChanged={updateBarLabelsWidth} fill={textColor} y={textCenter} alignmentBaseline="central" textAnchor="end">aaaa</SvgTextRect>
           </>;
         })}
         <Axes {...{ barWidth, theme, value, y: allBarsHeight + barPaddings }} />
