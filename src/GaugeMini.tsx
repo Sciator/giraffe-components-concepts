@@ -38,7 +38,7 @@ export interface IGaugeTheme {
   axesStrokeWidth: string | number;
   labelMain?: string;
   labelBars?: { _field: string, label: string }[];
-  axesSteps: number;
+  axesSteps: number | "thresholds";
   barPaddings: number;
 }
 
@@ -146,12 +146,9 @@ const BarValue: FunctionComponent<{
   </>;
 };
 
-const Bar: FunctionComponent<{ value: number, theme: IGaugeTheme, barWidth: number, y: number }> = ({
-  value,
-  theme,
-  y,
-  barWidth,
-}) => {
+const Bar: FunctionComponent<{
+  value: number, theme: IGaugeTheme, barWidth: number, y: number, getFrac: (x: number) => number,
+}> = ({ value, theme, y, barWidth, getFrac, }) => {
   const { gaugeHeight, valueHeight } = theme;
 
   const colors = getColors(theme);
@@ -165,10 +162,6 @@ const Bar: FunctionComponent<{ value: number, theme: IGaugeTheme, barWidth: numb
   const maxBarHeight = Math.max(gaugeHeight, valueHeight);
   const textCenter = y + maxBarHeight / 2;
 
-  /** return value as fraction 0->min 1->max */
-  const getFrac = (val: number): number =>
-    (val - colors.min.value) / colorLen
-    ;
   return <>
     <g {...t(0, gaugeBarY)}>
       <BarBackground {...{ colors, barWidth, theme, getFrac }} />
@@ -226,38 +219,47 @@ const getIndexPos = (arrLen: number, i: number) => {
 };
 
 // todo: Axes mode where numbers are shown at thresholds
-const Axes: FunctionComponent<{ theme: IGaugeTheme, barWidth: number, y: number }> = ({
-  theme,
-  barWidth,
-  y,
-}) => {
-  const { } = theme;
+const Axes: FunctionComponent<{
+  theme: IGaugeTheme, barWidth: number, y: number, getFrac: (x: number) => number,
+}> = ({ theme, barWidth, y, getFrac, }) => {
+  const { textColor: axesColor, axesSteps, axesStrokeWidth } = theme;
 
   const colors = getColors(theme);
 
   const colorLen = (colors.max.value - colors.min.value);
 
-  const { textColor: axesColor, axesSteps, axesStrokeWidth } = theme;
-
   const axesLineStyle = { stroke: axesColor, strokeWidth: axesStrokeWidth };
+
+  const points: {
+    anchor: string,
+    value: number,
+    lineLength: number,
+  }[] = (
+    axesSteps === "thresholds"
+      ? colors.thresholds.map(x => x.value)
+      : range(axesSteps).map(x => (x + 1) * colorLen / (axesSteps + 1) + colors.min.value)
+  ).map(value => ({
+    anchor: "middle",
+    value,
+    lineLength: 5,
+  }))
+    .concat([{
+      anchor: "start",
+      lineLength: 3,
+      value: colors.min.value,
+    }, {
+      anchor: "end",
+      lineLength: 3,
+      value: colors.max.value,
+    }])
+    ;
 
   return <>
     <g {...t(0, y)}>
       <line x2={barWidth}
         style={axesLineStyle} />
-      {range(axesSteps).map((x, i) => {
-        const posX = barWidth * x / (axesSteps - 1);
-        const value = colorLen * x / (axesSteps - 1) + colors.min.value;
-
-        const { isFirst, isLast } = getIndexPos(axesSteps, i);
-        const anchor =
-          (isFirst && "start")
-          || (isLast && "end")
-          || "middle";
-
-        const isSide = isFirst || isLast;
-        const lineLength = isSide ? 3 : 5;
-
+      {points.map(({ anchor, lineLength, value }, i) => {
+        const posX = getFrac(value) * barWidth;
         return <>
           <g {...t(posX, 0)} >
             <line
@@ -301,9 +303,6 @@ const AutoCenterGroup: FunctionComponent<{ enabled?: boolean, refreshToken?: num
     if (!box || !boxParent)
       return;
 
-    const boxCenterX = (box.width / 2) + box.x;
-    const parentCenterX = boxParent.width / 2;
-
     setX((boxParent.width - box.width) / 2 - box.x);
     setY((boxParent.height - box.height) / 2 - box.y);
   }, [refreshToken]);
@@ -332,9 +331,13 @@ export const GaugeMini: FunctionComponent<IProps> = ({ value, theme, width, heig
 
   const [autocenterToken, setAutocenterToken] = useState(0);
   useEffect(() => {
-    console.log("refr");
     setAutocenterToken(autocenterToken + 1);
   }, [barLabelsWidth, gaugePaddingSides, valueHeight]);
+
+  /** return value as fraction 0->min 1->max */
+  const getFrac = (val: number): number =>
+    (val - colors.min.value) / colorLen
+    ;
 
   return (
     <svg width={width} height={height} style={{ fontFamily: "Rubik, monospace" }} >
@@ -351,14 +354,14 @@ export const GaugeMini: FunctionComponent<IProps> = ({ value, theme, width, heig
           const textCenter = y + maxBarHeight / 2;
 
           // todo: no rerender ?
-          const onRectChanged = (r:DOMRect) => { barLabelsWidth[i] = r.width; };
+          const onRectChanged = (r: DOMRect) => { barLabelsWidth[i] = r.width; };
 
           return <>
-            <Bar {...{ barWidth, y, theme, value, }} />
+            <Bar {...{ barWidth, y, theme, value, getFrac }} />
             <SvgTextRect onRectChanged={onRectChanged} fill={textColor} y={textCenter} alignmentBaseline="central" textAnchor="end">{label && (label + nbsp)}</SvgTextRect>
           </>;
         })}
-        <Axes {...{ barWidth, theme, value, y: allBarsHeight + barPaddings }} />
+        <Axes {...{ barWidth, theme, value, y: allBarsHeight + barPaddings, getFrac }} />
         <g {...t(gaugePaddingSides, 0)}>
           {colors.targets.map(({ value, hex }) => {
             const posX = barWidth * ((value - colors.min.value) / colorLen);

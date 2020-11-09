@@ -27,7 +27,7 @@ const gaugeTheme: IGaugeTheme = ({
   textColorBarOutside: InfluxColors.Cloud,
   textColorBarInside: InfluxColors.Cloud,
   textColor: InfluxColors.Cloud,
-  axesSteps: 4,
+  axesSteps: "thresholds",
   axesStrokeWidth: "2px",
   barPaddings: 5,
   labelMain: "Processor usage",
@@ -46,11 +46,13 @@ const gaugeTheme2: IGaugeTheme = {
   textColorBarInside: InfluxColors.Raven,
   textColorBarOutside: InfluxColors.Raven,
   colorSecondary: InfluxColors.Chromium,
+  axesSteps: 3,
   labelBars: [
     { _field: "f1", label: "CPU 1" },
     { _field: "f2", label: "CPU 2" },
     { _field: "f3", label: "CPU 3" },
     { _field: "f4", label: "CPU rest" },
+    { _field: "_default", label: "CPU 1" },
   ],
 };
 
