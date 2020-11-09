@@ -4,6 +4,7 @@ import { color as d3Color } from "d3-color";
 import { scaleLinear } from "d3-scale";
 import { range } from "d3-array";
 import { t } from "./shorthands";
+import { SvgTextRect } from "./utilsSvg";
 
 export type Color = {
   id: string
@@ -184,14 +185,10 @@ const Text: FunctionComponent<{
   value: number,
 }> = ({ value, gaugeBarValueWidth, theme }) => {
   const { textColorBarInside, textColorBarOutside, textMode } = theme;
+  // todo: better padding style
   const textValue = ` ${(value).toFixed(0)} `;
 
   const [textBBox, setTextBBox] = useState<SVGRect | null>(null);
-  const textRef = useRef<SVGTextElement>(null);
-
-  useEffect(() => {
-    setTextBBox(textRef.current?.getBBox() as SVGRect);
-  }, []);
 
   const textInside = (textBBox?.width || 0) < gaugeBarValueWidth;
 
@@ -211,9 +208,11 @@ const Text: FunctionComponent<{
     ;
 
   return <>
-    <text ref={textRef} x={x} fill={textColor} textAnchor={textAnchor}
+    <SvgTextRect
+      onRectChanged={setTextBBox}
+      x={x} fill={textColor} textAnchor={textAnchor}
       alignmentBaseline="central"
-    >{textValue}</text>
+    >{textValue}</SvgTextRect>
   </>;
 };
 
