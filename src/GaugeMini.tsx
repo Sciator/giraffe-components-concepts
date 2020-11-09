@@ -13,17 +13,17 @@ export type Color = {
   value: number
 };
 
-interface Props {
-  width: number,
-  height: number,
-  value: number | { _field: string, value: number }[],
-  theme: GaugeTheme,
+interface IProps {
+  width: number;
+  height: number;
+  value: number | { _field: string, value: number }[];
+  theme: IGaugeTheme;
 }
 
 // todo: color type ?
 type TColor = string;
 
-export interface GaugeTheme {
+export interface IGaugeTheme {
   valueHeight: number;
   gaugeHeight: number;
   gaugePaddingSides: number;
@@ -32,8 +32,8 @@ export interface GaugeTheme {
   mode: "progress" | "bullet";
   textMode: "follow" | "left";
   textColor: TColor;
-  textColorBarOutside: TColor
-  textColorBarInside: TColor
+  textColorBarOutside: TColor;
+  textColorBarInside: TColor;
   axesStrokeWidth: string | number;
   labelMain?: string;
   labelBars?: { _field: string, label: string }[];
@@ -47,12 +47,12 @@ export type Colors = {
   secondary: TColor,
   thresholds: Color[],
   targets: Color[],
-}
+};
 
-export const getColors = (theme: GaugeTheme): Colors => {
+export const getColors = (theme: IGaugeTheme): Colors => {
   const { colorSecondary: secondary, colorsAndTargets } = theme;
 
-  colorsAndTargets.forEach(({ hex, name }) => d3Color(hex) ?? throwReturn(`Object "${hex}" isn"t valid color for name:${name}`))
+  colorsAndTargets.forEach(({ hex, name }) => d3Color(hex) ?? throwReturn(`Object "${hex}" isn"t valid color for name:${name}`));
 
   const min: Color = colorsAndTargets.find(x => x.type === "min") ?? throwReturn("color of type min must be defined");
   const max: Color = colorsAndTargets.find(x => x.type === "max") ?? throwReturn("color of type max must be defined");
@@ -60,18 +60,18 @@ export const getColors = (theme: GaugeTheme): Colors => {
   const thresholds = colorsAndTargets.filter(({ type }) => type === "threshold").sort(({ value: a }, { value: b }) => a - b);
   const targets = colorsAndTargets.filter(({ type }) => type === "target").sort(({ value: a }, { value: b }) => a - b);
 
-  return { max, min, secondary, targets, thresholds }
-}
+  return { max, min, secondary, targets, thresholds };
+};
 
 
 const throwReturn = <T extends unknown>(msg: string): T => {
   throw new Error(msg);
-}
+};
 
 // todo: bullet mode background min-max only -> gradient
 // todo: bullet mode background has to overlap, or page backgroud will make fake borders for all thresholds
 const BarBackground: FunctionComponent<{
-  theme: GaugeTheme,
+  theme: IGaugeTheme,
   colors: Colors,
   barWidth: number,
   getFrac: (x: number) => number,
@@ -80,7 +80,7 @@ const BarBackground: FunctionComponent<{
 
   const colors: { start: number, end: number, col: string }[] = [];
   if (mode === "progress") {
-    colors.push({ start: 0, end: 1, col: secondary })
+    colors.push({ start: 0, end: 1, col: secondary });
   } else {
     const all = [min, ...thresholds, max];
     let start = 0;
@@ -99,11 +99,11 @@ const BarBackground: FunctionComponent<{
     {colors.map(({ col, end, start }) =>
       <rect height={gaugeHeight} x={barWidth * start} width={barWidth * (end - start)} fill={col} />
     )}
-  </>
-}
+  </>;
+};
 
 const BarValue: FunctionComponent<{
-  theme: GaugeTheme,
+  theme: IGaugeTheme,
   gaugeBarValueWidth: number,
   colors: Colors,
   value: number,
@@ -121,7 +121,7 @@ const BarValue: FunctionComponent<{
               .range([colors.min.hex, colors.max.hex] as any)
               .domain([colors.min.value, colors.max.value])
               (value) as any
-          )
+          );
         } else {
           const sortedColors = [colors.min, ...colors.thresholds, colors.max];
           let i = 0;
@@ -133,17 +133,17 @@ const BarValue: FunctionComponent<{
           ].hex;
         }
       })()
-    )!
-      .brighter(1)
+    )
+      ?.brighter(1)
       .formatHex()
     ;
 
   return <>
     <rect height={valueHeight} width={gaugeBarValueWidth} y={(gaugeHeight - valueHeight) / 2} fill={colorValue as any} />
   </>;
-}
+};
 
-const Bar: FunctionComponent<{ value: number, theme: GaugeTheme, barWidth: number, y: number }> = ({
+const Bar: FunctionComponent<{ value: number, theme: IGaugeTheme, barWidth: number, y: number }> = ({
   value,
   theme,
   y,
@@ -160,7 +160,7 @@ const Bar: FunctionComponent<{ value: number, theme: GaugeTheme, barWidth: numbe
   const gaugeBarY = y;
   const gaugeBarValueWidth = barWidth * valueFrac;
   const maxBarHeight = Math.max(gaugeHeight, valueHeight);
-  const textCenter = y + maxBarHeight / 2
+  const textCenter = y + maxBarHeight / 2;
 
   /** return value as fraction 0->min 1->max */
   const getFrac = (val: number): number =>
@@ -175,23 +175,23 @@ const Bar: FunctionComponent<{ value: number, theme: GaugeTheme, barWidth: numbe
       <Text {...{ centerY: y, colors, gaugeBarValueWidth, theme, value }} />
     </g>
   </>;
-}
+};
 
 const Text: FunctionComponent<{
-  theme: GaugeTheme,
+  theme: IGaugeTheme,
   gaugeBarValueWidth: number,
   colors: Colors,
   value: number,
 }> = ({ value, gaugeBarValueWidth, theme }) => {
   const { textColorBarInside, textColorBarOutside, textMode } = theme;
-  const textValue = ` ${(value).toFixed(0)} `
+  const textValue = ` ${(value).toFixed(0)} `;
 
   const [textBBox, setTextBBox] = useState<SVGRect | null>(null);
   const textRef = useRef<SVGTextElement>(null);
 
   useEffect(() => {
-    setTextBBox(textRef.current?.getBBox() as SVGRect)
-  }, [])
+    setTextBBox(textRef.current?.getBBox() as SVGRect);
+  }, []);
 
   const textInside = (textBBox?.width || 0) < gaugeBarValueWidth;
 
@@ -215,17 +215,17 @@ const Text: FunctionComponent<{
       alignmentBaseline="central"
     >{textValue}</text>
   </>;
-}
+};
 
 const getIndexPos = (arrLen: number, i: number) => {
   return {
     isLast: i === arrLen - 1,
     isFirst: i === 0,
-  }
-}
+  };
+};
 
 // todo: Axes mode where numbers are shown at thresholds
-const Axes: FunctionComponent<{ theme: GaugeTheme, barWidth: number, y: number }> = ({
+const Axes: FunctionComponent<{ theme: IGaugeTheme, barWidth: number, y: number }> = ({
   theme,
   barWidth,
   y,
@@ -252,7 +252,7 @@ const Axes: FunctionComponent<{ theme: GaugeTheme, barWidth: number, y: number }
         const anchor =
           (isFirst && "start")
           || (isLast && "end")
-          || "middle"
+          || "middle";
 
         const isSide = isFirst || isLast;
         const lineLength = isSide ? 3 : 5;
@@ -272,11 +272,11 @@ const Axes: FunctionComponent<{ theme: GaugeTheme, barWidth: number, y: number }
               {value.toFixed(0)}
             </text>
           </g>
-        </>
+        </>;
       })}
     </g>
   </>;
-}
+};
 
 const AutoCenterGroup: FunctionComponent<{ enabled?: boolean }> = ({ children, enabled = true }) => {
   const ref = useRef<SVGGElement>(null);
@@ -291,27 +291,30 @@ const AutoCenterGroup: FunctionComponent<{ enabled?: boolean }> = ({ children, e
     if (!enabled)
       return;
 
-    const g = ref.current!;
-    const box = g.getBoundingClientRect();
-    const boxParent = g.parentElement!.getBoundingClientRect();
+    const g = ref.current;
+    const box = g?.getBoundingClientRect();
+    const boxParent = g?.parentElement?.getBoundingClientRect();
+
+    if (!box || !boxParent)
+      return;
 
     setX((boxParent.width - box.width) / 2);
     setY((boxParent.height - box.height) / 2);
-  }, [refr])
+  }, [refr]);
 
   return <g ref={ref} {...t(x, y)}>
     {children}
-  </g>
-}
+  </g>;
+};
 
-export const GaugeMini: FunctionComponent<Props> = ({ value, theme, width, height }) => {
+export const GaugeMini: FunctionComponent<IProps> = ({ value, theme, width, height }) => {
   const { gaugeHeight, gaugePaddingSides, valueHeight, barPaddings, labelMain, textColor } = theme;
 
   const valueArray = Array.isArray(value) ? value : [{ _field: "_default", value }];
 
   const colors = getColors(theme);
   const colorLen = (colors.max.value - colors.min.value);
-  const centerY = height / 2
+  const centerY = height / 2;
 
   const gaugeBarY = centerY - (gaugeHeight / 2);
   const barWidth = width - gaugePaddingSides * 2;
@@ -321,17 +324,17 @@ export const GaugeMini: FunctionComponent<Props> = ({ value, theme, width, heigh
   const allBarsHeight = valueArray.length * (maxBarHeight + barPaddings);
 
   return (
-    <svg width={width} height={height} style={{fontFamily:"Rubik, monospace"}} >
+    <svg width={width} height={height} style={{ fontFamily: "Rubik, monospace" }} >
       <AutoCenterGroup enabled={true}>
         {labelMain &&
-          <text fill={textColor} y={-barPaddings*2}>
+          <text fill={textColor} y={-barPaddings * 2}>
             {labelMain}
           </text>
         }
         {valueArray.map(({ _field, value }, i) => {
           const y = 0 + i * (maxBarHeight + barPaddings);
 
-          const textCenter = y + maxBarHeight / 2
+          const textCenter = y + maxBarHeight / 2;
 
           return <>
             <Bar {...{ barWidth, y, theme, value, }} />
@@ -358,10 +361,10 @@ export const GaugeMini: FunctionComponent<Props> = ({ value, theme, width, heigh
               >
                 {value}
               </text>
-            </>
+            </>;
           })}
         </g>
       </AutoCenterGroup>
     </svg>
-  )
-}
+  );
+};

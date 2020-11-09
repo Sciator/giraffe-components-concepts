@@ -83,8 +83,8 @@
   "scripts": {
     "dev": "react-scripts start",
     "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "lint": "tslint -c tslint.json ./src/**/*.ts{,x}",
+    "lint:fix": "yarn lint --fix"
   },
   "eslintConfig": {
     "extends": [
@@ -103,5 +103,8 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "tslint": "^6.1.3"
   }
 }

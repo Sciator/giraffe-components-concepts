@@ -1,12 +1,12 @@
-import React, { useState, useEffect, FunctionComponent, useRef } from "react"
+import React, { useState, useEffect, FunctionComponent, useRef } from "react";
 
 import { InfluxColors } from "@influxdata/clockface";
-import { GaugeMini, GaugeTheme, getColors, Color } from "./GaugeMini";
+import { GaugeMini, IGaugeTheme, getColors, Color } from "./GaugeMini";
 
 const width = 300;
 const height = 200;
 
-const gaugeTheme: GaugeTheme = ({
+const gaugeTheme: IGaugeTheme = ({
   mode: "bullet",
   valueHeight: 18,
   gaugeHeight: 25,
@@ -31,24 +31,27 @@ const gaugeTheme: GaugeTheme = ({
   axesStrokeWidth: "2px",
   barPaddings: 5,
   labelMain: "Processor usage",
-})
+});
 
-const gaugeTheme2: GaugeTheme = {
+const gaugeTheme2: IGaugeTheme = {
   ...gaugeTheme,
   valueHeight: 20,
   gaugeHeight: 20,
   mode: "progress",
   textMode: "follow",
-  colorsAndTargets: [gaugeTheme.colorsAndTargets[0], gaugeTheme.colorsAndTargets[gaugeTheme.colorsAndTargets.length - 1]],
+  colorsAndTargets: [
+    gaugeTheme.colorsAndTargets[0],
+    gaugeTheme.colorsAndTargets[gaugeTheme.colorsAndTargets.length - 1],
+  ],
   textColorBarInside: InfluxColors.Raven,
   textColorBarOutside: InfluxColors.Raven,
   colorSecondary: InfluxColors.Chromium,
-  labelBars:[
+  labelBars: [
     { _field: "f1", label: "CPU 1" },
     { _field: "f2", label: "CPU 2" },
     { _field: "f3", label: "CPU 3" },
     { _field: "f4", label: "CPU rest" },
-  ]
+  ],
 };
 
 const App: FunctionComponent<any> = () => {
@@ -63,7 +66,7 @@ const App: FunctionComponent<any> = () => {
         newVal = min;
       setVal(newVal);
     }, 20);
-  }
+  };
 
   useEffect(() => loop(), [val]);
 
@@ -98,7 +101,7 @@ const App: FunctionComponent<any> = () => {
       <GaugeMini value={96} theme={gaugeTheme2} {...{ width, height }} />
       <GaugeMini value={120} theme={gaugeTheme2} {...{ width, height }} />
     </div>
-  )
-}
+  );
+};
 
-export default App
+export default App;
