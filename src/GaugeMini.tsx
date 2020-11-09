@@ -38,7 +38,7 @@ export interface IGaugeTheme {
   axesStrokeWidth: string | number;
   labelMain?: string;
   labelBars?: { _field: string, label: string }[];
-  axesSteps: number | "thresholds";
+  axesSteps: number | "thresholds" | undefined | number[];
   barPaddings: number;
 }
 
@@ -221,21 +221,26 @@ const Axes: FunctionComponent<{
 }> = ({ theme, barWidth, y, getFrac, }) => {
   const { textColor: axesColor, axesSteps, axesStrokeWidth } = theme;
 
+  if (axesSteps === undefined || axesSteps === null) return <></>;
+
   const colors = getColors(theme);
 
   const colorLen = (colors.max.value - colors.min.value);
 
   const axesLineStyle = { stroke: axesColor, strokeWidth: axesStrokeWidth };
 
+  const axesValuesArray =
+    Array.isArray(axesSteps) ? axesSteps
+      : axesSteps === "thresholds" ? colors.thresholds.map(x => x.value)
+        : Number.isInteger(axesSteps) ? range(axesSteps).map(x => (x + 1) * colorLen / (axesSteps + 1) + colors.min.value)
+          : throwReturn<number[]>(`${JSON.stringify(axesSteps)} axesSteps must be number | "thresholds" | number[] | undefined.`)
+    ;
+
   const points: {
     anchor: string,
     value: number,
     lineLength: number,
-  }[] = (
-    axesSteps === "thresholds"
-      ? colors.thresholds.map(x => x.value)
-      : range(axesSteps).map(x => (x + 1) * colorLen / (axesSteps + 1) + colors.min.value)
-  ).map(value => ({
+  }[] = axesValuesArray.map(value => ({
     anchor: "middle",
     value,
     lineLength: 5,

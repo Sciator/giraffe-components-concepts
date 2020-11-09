@@ -15,7 +15,6 @@
 ## TODO:
 
  - what to do with outside values - greater than max / lower than min
- - option to hide axes
  - value units
  - bullet mode background min-max only -> gradient
 
