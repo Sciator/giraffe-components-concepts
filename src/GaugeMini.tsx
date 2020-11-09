@@ -71,8 +71,6 @@ const throwReturn = <T extends unknown>(msg: string): T => {
   throw new Error(msg);
 };
 
-// todo: bullet mode background min-max only -> gradient
-// todo: bullet mode background has to overlap, or page backgroud will make fake borders for all thresholds
 const BarBackground: FunctionComponent<{
   theme: IGaugeTheme,
   colors: Colors,
@@ -218,7 +216,6 @@ const getIndexPos = (arrLen: number, i: number) => {
   };
 };
 
-// todo: Axes mode where numbers are shown at thresholds
 const Axes: FunctionComponent<{
   theme: IGaugeTheme, barWidth: number, y: number, getFrac: (x: number) => number,
 }> = ({ theme, barWidth, y, getFrac, }) => {
