@@ -78,6 +78,8 @@ const App: FunctionComponent<any> = () => {
       overflow: "auto",
       textAlign: "center",
     }}>
+      <GaugeMini value={val} theme={gaugeTheme} {...{ width, height }} />
+      <GaugeMini value={val} theme={gaugeTheme2} {...{ width, height }} />
       <GaugeMini value={[
         { _field: "f3", value: 96 },
         { _field: "f4", value: 120 },
