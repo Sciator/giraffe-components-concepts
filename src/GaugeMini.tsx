@@ -68,6 +68,7 @@ const throwReturn = <T extends unknown>(msg: string): T => {
   throw new Error(msg);
 }
 
+// todo: bullet mode background min-max only -> gradient
 // todo: bullet mode background has to overlap, or page backgroud will make fake borders for all thresholds
 const BarBackground: FunctionComponent<{
   theme: GaugeTheme,
