@@ -40,6 +40,10 @@ export interface IGaugeTheme {
   labelBars?: { _field: string, label: string }[];
   axesSteps: number | "thresholds" | undefined | number[];
   barPaddings: number;
+  formaters: {
+    barValue: (value: number) => string,
+    axes: (value: number) => string,
+  };
 }
 
 export type Colors = {
@@ -180,9 +184,9 @@ const Text: FunctionComponent<{
   colors: Colors,
   value: number,
 }> = ({ value, gaugeBarValueWidth, theme }) => {
-  const { textColorBarInside, textColorBarOutside, textMode } = theme;
+  const { textColorBarInside, textColorBarOutside, textMode, formaters } = theme;
   // todo: better padding style
-  const textValue = nbsp + (value).toFixed(0) + nbsp;
+  const textValue = nbsp + formaters.barValue(value) + nbsp;
 
   const [textBBox, setTextBBox] = useState<SVGRect | null>(null);
 
@@ -212,17 +216,10 @@ const Text: FunctionComponent<{
   </>;
 };
 
-const getIndexPos = (arrLen: number, i: number) => {
-  return {
-    isLast: i === arrLen - 1,
-    isFirst: i === 0,
-  };
-};
-
 const Axes: FunctionComponent<{
   theme: IGaugeTheme, barWidth: number, y: number, getFrac: (x: number) => number,
 }> = ({ theme, barWidth, y, getFrac, }) => {
-  const { textColor: axesColor, axesSteps, axesStrokeWidth } = theme;
+  const { textColor: axesColor, axesSteps, axesStrokeWidth, formaters } = theme;
 
   if (axesSteps === undefined || axesSteps === null) return <></>;
 
@@ -265,6 +262,7 @@ const Axes: FunctionComponent<{
         style={axesLineStyle} />
       {points.map(({ anchor, lineLength, value }, i) => {
         const posX = getFrac(value) * barWidth;
+        const text = formaters.axes(value);
         return <>
           <g {...t(posX, 0)} >
             <line
@@ -277,7 +275,7 @@ const Axes: FunctionComponent<{
               alignmentBaseline="hanging"
               fill={axesColor}
             >
-              {value.toFixed(0)}
+              {text}
             </text>
           </g>
         </>;

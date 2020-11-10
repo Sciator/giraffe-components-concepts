@@ -12,15 +12,15 @@ const gaugeTheme: IGaugeTheme = ({
   gaugeHeight: 25,
   gaugePaddingSides: 20,
   colorsAndTargets: [
-    { value: 8, type: "min", hex: InfluxColors.Topaz, ...({} as any) },
+    { value: 0, type: "min", hex: InfluxColors.Krypton, ...({} as any) },
 
-    { value: 55, type: "threshold", hex: InfluxColors.Sulfur, ...({} as any) },
-    { value: 82, type: "threshold", hex: InfluxColors.Krypton, ...({} as any) },
+    { value: 50, type: "threshold", hex: InfluxColors.Sulfur, ...({} as any) },
+    { value: 80, type: "threshold", hex: InfluxColors.Topaz, ...({} as any) },
 
     // { value: 55, type: "target", hex: InfluxColors.Sulfur, ...({} as any) },
     // { value: 82, type: "target", hex: InfluxColors.Krypton, ...({} as any) },
 
-    { value: 120, type: "max", hex: InfluxColors.Krypton, ...({} as any) },
+    { value: 100, type: "max", hex: InfluxColors.Topaz, ...({} as any) },
   ] as Color[],
   colorSecondary: InfluxColors.Raven,
   textMode: "left",
@@ -31,6 +31,10 @@ const gaugeTheme: IGaugeTheme = ({
   axesStrokeWidth: "2px",
   barPaddings: 5,
   labelMain: "Processor usage",
+  formaters: {
+    axes: (num: number) => num.toFixed(0) + "%",
+    barValue: (num: number) => num.toFixed(0) + "%",
+  }
 });
 
 const gaugeTheme2: IGaugeTheme = {
@@ -40,20 +44,26 @@ const gaugeTheme2: IGaugeTheme = {
   mode: "progress",
   textMode: "follow",
   colorsAndTargets: [
-    gaugeTheme.colorsAndTargets[0],
-    gaugeTheme.colorsAndTargets[gaugeTheme.colorsAndTargets.length - 1],
+    { ...gaugeTheme.colorsAndTargets[0], value: 30 },
+    { ...gaugeTheme.colorsAndTargets[gaugeTheme.colorsAndTargets.length - 1], value: 130 },
   ],
   textColorBarInside: InfluxColors.Raven,
   textColorBarOutside: InfluxColors.Raven,
   colorSecondary: InfluxColors.Chromium,
-  axesSteps: 3,
+  axesSteps: [60, 85],
   labelBars: [
-    { _field: "f1", label: "CPU 1" },
-    { _field: "f2", label: "CPU 2" },
-    { _field: "f3", label: "CPU 3" },
-    { _field: "f4", label: "CPU rest" },
+    { _field: "f1", label: "Room 1" },
+    { _field: "f2", label: "Room 2" },
+    { _field: "f3", label: "Room 3" },
+    { _field: "f4", label: "Yard" },
     { _field: "_default", label: "CPU 1" },
   ],
+  labelMain: "Loudness",
+  formaters: {
+    ...gaugeTheme.formaters,
+    axes: (val: number) => val.toFixed(0) + "dB",
+    barValue: (val: number) => val.toFixed(0) + "dB",
+  },
 };
 
 const App: FunctionComponent<any> = () => {
@@ -83,12 +93,12 @@ const App: FunctionComponent<any> = () => {
       <GaugeMini value={val} theme={gaugeTheme} {...{ width, height }} />
       <GaugeMini value={val} theme={gaugeTheme2} {...{ width, height }} />
       <GaugeMini value={[
-        { _field: "f3", value: 96 },
-        { _field: "f4", value: 120 },
+        { _field: "f3", value: 34 },
+        { _field: "f4", value: 98 },
       ]} theme={gaugeTheme} {...{ width, height }} />
       <GaugeMini value={[
-        { _field: "f1", value: 15 },
-        { _field: "f2", value: 25 },
+        { _field: "f1", value: 33 },
+        { _field: "f2", value: 56 },
         { _field: "f3", value: 96 },
         { _field: "f4", value: 120 },
       ]} theme={gaugeTheme2} {...{ width, height }} />
