@@ -14,7 +14,6 @@
 
 ## TODO:
 
- - what to do with outside values - greater than max / lower than min
  - value units
  - bullet mode background min-max only -> gradient
 

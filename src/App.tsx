@@ -59,15 +59,15 @@ const gaugeTheme2: IGaugeTheme = {
 const App: FunctionComponent<any> = () => {
   const { min: { value: min }, max: { value: max } } = getColors(gaugeTheme);
 
-  const [val, setVal] = useState(min);
+  const [val, setVal] = useState(min - 20);
 
   const loop = () => {
     setTimeout(() => {
       let newVal = val + 1;
-      if (newVal > max)
-        newVal = min;
+      if (newVal > max + 100)
+        newVal = min - 100;
       setVal(newVal);
-    }, 20);
+    }, 10);
   };
 
   useEffect(() => loop(), [val]);

@@ -108,7 +108,8 @@ const BarValue: FunctionComponent<{
   gaugeBarValueWidth: number,
   colors: Colors,
   value: number,
-}> = ({ colors, gaugeBarValueWidth, value, theme }) => {
+  valueFracFixed: number,
+}> = ({ colors, gaugeBarValueWidth, value, theme, valueFracFixed }) => {
   const { valueHeight, gaugeHeight, mode } = theme;
   const colorModeGradient = colors.thresholds.length === 0;
 
@@ -140,7 +141,7 @@ const BarValue: FunctionComponent<{
     ;
 
   return <>
-    <rect height={valueHeight} width={gaugeBarValueWidth} y={(gaugeHeight - valueHeight) / 2} fill={colorValue as any} />
+    <rect height={valueHeight} width={Math.abs(gaugeBarValueWidth)} x={Math.sign(valueFracFixed) === -1 ? gaugeBarValueWidth : 0} y={(gaugeHeight - valueHeight) / 2} fill={colorValue as any} />
   </>;
 };
 
@@ -151,19 +152,21 @@ const Bar: FunctionComponent<{
 
   const colors = getColors(theme);
 
-  const colorLen = (colors.max.value - colors.min.value);
-
-  const valueFrac = ((value - colors.min.value) / colorLen);
+  const oveflowFrac = .03;
+  // fixes fraction into -oveflowFrac <-> 1+oveflowFrac
+  const getFixedFrac = (val: number) => Math.max(-oveflowFrac, Math.min(oveflowFrac + 1, getFrac(val)))
+    ;
+  const valueFracFixed = getFixedFrac(value);
 
   const gaugeBarY = y;
-  const gaugeBarValueWidth = barWidth * valueFrac;
+  const gaugeBarValueWidth = barWidth * valueFracFixed;
   const maxBarHeight = Math.max(gaugeHeight, valueHeight);
   const textCenter = y + maxBarHeight / 2;
 
   return <>
     <g {...t(0, gaugeBarY)}>
       <BarBackground {...{ colors, barWidth, theme, getFrac }} />
-      <BarValue {...{ colors, gaugeBarValueWidth, theme, value }} />
+      <BarValue {...{ colors, gaugeBarValueWidth, theme, value, valueFracFixed }} />
     </g>
     <g {...t(0, textCenter)}>
       <Text {...{ centerY: y, colors, gaugeBarValueWidth, theme, value }} />
@@ -196,7 +199,7 @@ const Text: FunctionComponent<{
     ;
 
   const x = textMode === "follow"
-    ? gaugeBarValueWidth
+    ? Math.max(gaugeBarValueWidth, 0)
     : 0
     ;
 
