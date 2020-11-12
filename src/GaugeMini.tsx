@@ -5,6 +5,7 @@ import { scaleLinear } from "d3-scale";
 import { range } from "d3-array";
 import { t } from "./shorthands";
 import { SvgTextRect } from "./utilsSvg";
+import { InfluxColors } from "@influxdata/clockface";
 
 export type Color = {
   id: string
@@ -18,33 +19,62 @@ interface IProps {
   width: number;
   height: number;
   value: number | { _field: string, value: number }[];
-  theme: IGaugeTheme;
+  theme: Required<IGaugeTheme>;
 }
 
 // todo: color type ?
 type TColor = string;
 
 export interface IGaugeTheme {
-  valueHeight: number;
-  gaugeHeight: number;
-  gaugePaddingSides: number;
-  colorsAndTargets: Color[];
-  colorSecondary: TColor;
-  mode: "progress" | "bullet";
-  textMode: "follow" | "left";
-  textColor: TColor;
-  textColorBarOutside: TColor;
-  textColorBarInside: TColor;
-  axesStrokeWidth: string | number;
+  type: "gauge mini";
+  valueHeight?: number;
+  gaugeHeight?: number;
+  gaugePaddingSides?: number;
+  colorsAndTargets?: Color[];
+  colorSecondary?: TColor;
+  mode?: "progress" | "bullet";
+  textMode?: "follow" | "left";
+  textColor?: TColor;
+  textColorBarOutside?: TColor;
+  textColorBarInside?: TColor;
+  axesStrokeWidth?: string | number;
   labelMain?: string;
   labelBars?: { _field: string, label: string }[];
-  axesSteps: number | "thresholds" | undefined | number[];
-  barPaddings: number;
-  formaters: {
+  axesSteps?: number | "thresholds" | undefined | number[];
+  barPaddings?: number;
+  formaters?: {
     barValue: (value: number) => string,
     axes: (value: number) => string,
   };
 }
+
+export const GAUGE_THEME_DEFAULTS: Required<IGaugeTheme> = {
+  type: "gauge mini",
+  mode: "bullet",
+  valueHeight: 18,
+  gaugeHeight: 25,
+  gaugePaddingSides: 20,
+  colorsAndTargets: [
+    { value: 0, type: "min", hex: InfluxColors.Krypton },
+    { value: 50, type: "threshold", hex: InfluxColors.Sulfur },
+    { value: 75, type: "threshold", hex: InfluxColors.Topaz },
+    { value: 100, type: "max", hex: InfluxColors.Topaz },
+  ] as Color[],
+  colorSecondary: InfluxColors.Raven,
+  textMode: "follow",
+  textColorBarOutside: InfluxColors.Raven,
+  textColorBarInside: InfluxColors.Cloud,
+  textColor: InfluxColors.Cloud,
+  axesSteps: "thresholds",
+  axesStrokeWidth: "2px",
+  barPaddings: 5,
+  labelMain: "",
+  labelBars: [],
+  formaters: {
+    axes: (num: number) => num.toFixed(0),
+    barValue: (num: number) => num.toFixed(0),
+  },
+};
 
 export type Colors = {
   min: Color,
@@ -54,9 +84,7 @@ export type Colors = {
   targets: Color[],
 };
 
-const nbsp = " ";
-
-export const getColors = (theme: IGaugeTheme): Colors => {
+export const getColors = (theme: Required<IGaugeTheme>): Colors => {
   const { colorSecondary: secondary, colorsAndTargets } = theme;
 
   colorsAndTargets.forEach(({ hex, name }) => d3Color(hex) ?? throwReturn(`Object "${hex}" isn"t valid color for name:${name}`));
@@ -76,7 +104,7 @@ const throwReturn = <T extends unknown>(msg: string): T => {
 };
 
 const BarBackground: FunctionComponent<{
-  theme: IGaugeTheme,
+  theme: Required<IGaugeTheme>,
   colors: Colors,
   barWidth: number,
   getFrac: (x: number) => number,
@@ -108,7 +136,7 @@ const BarBackground: FunctionComponent<{
 };
 
 const BarValue: FunctionComponent<{
-  theme: IGaugeTheme,
+  theme: Required<IGaugeTheme>,
   gaugeBarValueWidth: number,
   colors: Colors,
   value: number,
@@ -150,7 +178,7 @@ const BarValue: FunctionComponent<{
 };
 
 const Bar: FunctionComponent<{
-  value: number, theme: IGaugeTheme, barWidth: number, y: number, getFrac: (x: number) => number,
+  value: number, theme: Required<IGaugeTheme>, barWidth: number, y: number, getFrac: (x: number) => number,
 }> = ({ value, theme, y, barWidth, getFrac, }) => {
   const { gaugeHeight, valueHeight } = theme;
 
@@ -179,18 +207,18 @@ const Bar: FunctionComponent<{
 };
 
 const Text: FunctionComponent<{
-  theme: IGaugeTheme,
+  theme: Required<IGaugeTheme>,
   gaugeBarValueWidth: number,
   colors: Colors,
   value: number,
 }> = ({ value, gaugeBarValueWidth, theme }) => {
   const { textColorBarInside, textColorBarOutside, textMode, formaters } = theme;
-  // todo: better padding style
-  const textValue = nbsp + formaters.barValue(value) + nbsp;
+  const textValue = formaters.barValue(value);
 
   const [textBBox, setTextBBox] = useState<SVGRect | null>(null);
+  const padding = 5;
 
-  const textInside = (textBBox?.width || 0) < gaugeBarValueWidth;
+  const textInside = (textBBox?.width ? textBBox?.width + padding * 2 : 0) < gaugeBarValueWidth;
 
   const textAnchor = (textInside && textMode === "follow")
     ? "end"
@@ -203,8 +231,8 @@ const Text: FunctionComponent<{
     ;
 
   const x = textMode === "follow"
-    ? Math.max(gaugeBarValueWidth, 0)
-    : 0
+    ? Math.max(gaugeBarValueWidth + (textInside ? -padding : padding), padding)
+    : padding
     ;
 
   return <>
@@ -217,7 +245,7 @@ const Text: FunctionComponent<{
 };
 
 const Axes: FunctionComponent<{
-  theme: IGaugeTheme, barWidth: number, y: number, getFrac: (x: number) => number,
+  theme: Required<IGaugeTheme>, barWidth: number, y: number, getFrac: (x: number) => number,
 }> = ({ theme, barWidth, y, getFrac, }) => {
   const { textColor: axesColor, axesSteps, axesStrokeWidth, formaters } = theme;
 
@@ -325,8 +353,10 @@ export const GaugeMini: FunctionComponent<IProps> = ({ value, theme, width, heig
   const colorLen = (colors.max.value - colors.min.value);
   const centerY = height / 2;
 
+  const barLabelWidth = Math.max(...barLabelsWidth) || 0;
+
   const gaugeBarY = centerY - (gaugeHeight / 2);
-  const barWidth = width - gaugePaddingSides * 2 - (Math.max(...barLabelsWidth) || 0);
+  const barWidth = width - gaugePaddingSides * 2 - barLabelWidth;
 
   const maxBarHeight = Math.max(gaugeHeight, valueHeight);
 

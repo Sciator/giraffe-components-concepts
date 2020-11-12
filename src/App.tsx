@@ -1,35 +1,20 @@
+// tslint:disable: no-non-null-assertion
 import React, { useState, useEffect, FunctionComponent, useRef } from "react";
 
 import { InfluxColors } from "@influxdata/clockface";
-import { GaugeMini, IGaugeTheme, getColors, Color } from "./GaugeMini";
+import { GaugeMini, IGaugeTheme, getColors, Color, GAUGE_THEME_DEFAULTS } from "./GaugeMini";
 
 const width = 300;
 const height = 200;
 
-const gaugeTheme: IGaugeTheme = ({
-  mode: "bullet",
-  valueHeight: 18,
-  gaugeHeight: 25,
-  gaugePaddingSides: 20,
+const gaugeTheme: Required<IGaugeTheme> = ({
+  ...GAUGE_THEME_DEFAULTS,
   colorsAndTargets: [
-    { value: 0, type: "min", hex: InfluxColors.Krypton, ...({} as any) },
-
-    { value: 50, type: "threshold", hex: InfluxColors.Sulfur, ...({} as any) },
-    { value: 80, type: "threshold", hex: InfluxColors.Topaz, ...({} as any) },
+    ...GAUGE_THEME_DEFAULTS.colorsAndTargets,
 
     // { value: 55, type: "target", hex: InfluxColors.Sulfur, ...({} as any) },
     // { value: 82, type: "target", hex: InfluxColors.Krypton, ...({} as any) },
-
-    { value: 100, type: "max", hex: InfluxColors.Topaz, ...({} as any) },
   ] as Color[],
-  colorSecondary: InfluxColors.Raven,
-  textMode: "left",
-  textColorBarOutside: InfluxColors.Cloud,
-  textColorBarInside: InfluxColors.Cloud,
-  textColor: InfluxColors.Cloud,
-  axesSteps: "thresholds",
-  axesStrokeWidth: "2px",
-  barPaddings: 5,
   labelMain: "Processor usage",
   formaters: {
     axes: (num: number) => num.toFixed(0) + "%",
@@ -37,15 +22,15 @@ const gaugeTheme: IGaugeTheme = ({
   }
 });
 
-const gaugeTheme2: IGaugeTheme = {
+const gaugeTheme2: Required<IGaugeTheme> = {
   ...gaugeTheme,
   valueHeight: 20,
   gaugeHeight: 20,
   mode: "progress",
   textMode: "follow",
   colorsAndTargets: [
-    { ...gaugeTheme.colorsAndTargets[0], value: 30 },
-    { ...gaugeTheme.colorsAndTargets[gaugeTheme.colorsAndTargets.length - 1], value: 130 },
+    { ...gaugeTheme.colorsAndTargets.find(({ type }) => type === "min")!, value: 30 },
+    { ...gaugeTheme.colorsAndTargets.find(({ type }) => type === "max")!, value: 130 },
   ],
   textColorBarInside: InfluxColors.Raven,
   textColorBarOutside: InfluxColors.Raven,
@@ -93,7 +78,7 @@ const App: FunctionComponent<any> = () => {
       <GaugeMini value={val} theme={gaugeTheme} {...{ width, height }} />
       <GaugeMini value={val} theme={gaugeTheme2} {...{ width, height }} />
       <GaugeMini value={[
-        { _field: "f3", value: 34 },
+        { _field: "f3", value: 12 },
         { _field: "f4", value: 98 },
       ]} theme={gaugeTheme} {...{ width, height }} />
       <GaugeMini value={[
