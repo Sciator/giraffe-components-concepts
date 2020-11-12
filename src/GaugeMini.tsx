@@ -361,7 +361,7 @@ export const GaugeMini: FunctionComponent<IProps> = ({ value, theme, width, heig
 
           return <>
             <Bar {...{ barWidth, y, theme, value, getFrac }} />
-            <SvgTextRect onRectChanged={onRectChanged} fill={textColor} y={textCenter} alignmentBaseline="central" textAnchor="end">{label && (label + nbsp)}</SvgTextRect>
+            <SvgTextRect onRectChanged={onRectChanged} fill={textColor} y={textCenter} x={-10} alignmentBaseline="central" textAnchor="end">{label}</SvgTextRect>
           </>;
         })}
         <Axes {...{ barWidth, theme, value, y: allBarsHeight + barPaddings, getFrac }} />
