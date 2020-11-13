@@ -3,40 +3,37 @@ import React, { FunctionComponent, useEffect, useRef, useState } from "react";
 import { color as d3Color } from "d3-color";
 import { scaleLinear } from "d3-scale";
 import { range } from "d3-array";
-import { t } from "./shorthands";
-import { SvgTextRect } from "./utilsSvg";
-import { InfluxColors } from "@influxdata/clockface";
+import { Color } from "./types";
 
-export type Color = {
-  id: string
-  type: "min" | "max" | "threshold" | "scale" | "text" | "background" | "target"
-  hex: string
-  name: string
-  value: number
+// todo: remove before minigauge release
+export const t = (x: number, y: number) => ({
+  transform: `translate(${x},${y})`,
+});
+
+
+const throwReturn = <T extends unknown>(msg: string): T => {
+  throw new Error(msg);
 };
 
 interface IProps {
   width: number;
   height: number;
   value: number | { _field: string, value: number }[];
-  theme: Required<IGaugeTheme>;
+  theme: Required<GaugeMiniLayerConfig>;
 }
 
-// todo: color type ?
-type TColor = string;
-
-export interface IGaugeTheme {
+export interface GaugeMiniLayerConfig {
   type: "gauge mini";
   valueHeight?: number;
   gaugeHeight?: number;
   gaugePaddingSides?: number;
   colorsAndTargets?: Color[];
-  colorSecondary?: TColor;
+  colorSecondary?: string;
   mode?: "progress" | "bullet";
   textMode?: "follow" | "left";
-  textColor?: TColor;
-  textColorBarOutside?: TColor;
-  textColorBarInside?: TColor;
+  textColor?: string;
+  textColorBarOutside?: string;
+  textColorBarInside?: string;
   axesStrokeWidth?: string | number;
   labelMain?: string;
   labelBars?: { _field: string, label: string }[];
@@ -48,43 +45,18 @@ export interface IGaugeTheme {
   };
 }
 
-export const GAUGE_THEME_DEFAULTS: Required<IGaugeTheme> = {
-  type: "gauge mini",
-  mode: "bullet",
-  valueHeight: 18,
-  gaugeHeight: 25,
-  gaugePaddingSides: 20,
-  colorsAndTargets: [
-    { value: 0, type: "min", hex: InfluxColors.Krypton },
-    { value: 50, type: "threshold", hex: InfluxColors.Sulfur },
-    { value: 75, type: "threshold", hex: InfluxColors.Topaz },
-    { value: 100, type: "max", hex: InfluxColors.Topaz },
-  ] as Color[],
-  colorSecondary: InfluxColors.Raven,
-  textMode: "follow",
-  textColorBarOutside: InfluxColors.Raven,
-  textColorBarInside: InfluxColors.Cloud,
-  textColor: InfluxColors.Cloud,
-  axesSteps: "thresholds",
-  axesStrokeWidth: "2px",
-  barPaddings: 5,
-  labelMain: "",
-  labelBars: [],
-  formaters: {
-    axes: (num: number) => num.toFixed(0),
-    barValue: (num: number) => num.toFixed(0),
-  },
-};
+
+//#region colors
 
 export type Colors = {
   min: Color,
   max: Color,
-  secondary: TColor,
+  secondary: string,
   thresholds: Color[],
-  targets: Color[],
+  // targets: Color[],
 };
 
-export const getColors = (theme: Required<IGaugeTheme>): Colors => {
+export const getColors = (theme: Required<GaugeMiniLayerConfig>): Colors => {
   const { colorSecondary: secondary, colorsAndTargets } = theme;
 
   colorsAndTargets.forEach(({ hex, name }) => d3Color(hex) ?? throwReturn(`Object "${hex}" isn"t valid color for name:${name}`));
@@ -93,18 +65,47 @@ export const getColors = (theme: Required<IGaugeTheme>): Colors => {
   const max: Color = colorsAndTargets.find(x => x.type === "max") ?? throwReturn("color of type max must be defined");
 
   const thresholds = colorsAndTargets.filter(({ type }) => type === "threshold").sort(({ value: a }, { value: b }) => a - b);
-  const targets = colorsAndTargets.filter(({ type }) => type === "target").sort(({ value: a }, { value: b }) => a - b);
+  // const targets = colorsAndTargets.filter(({ type }) => type === "target").sort(({ value: a }, { value: b }) => a - b);
 
-  return { max, min, secondary, targets, thresholds };
+  return { max, min, secondary, /* targets, */ thresholds };
 };
 
+//#endregion colors
 
-const throwReturn = <T extends unknown>(msg: string): T => {
-  throw new Error(msg);
+
+//#region svg helpers
+
+type TSvgTextRectProps = {
+  onRectChanged?: (rect: DOMRect) => void,
+} & React.SVGProps<SVGTextElement>;
+
+/**
+ * Helper component that returns rect when children changes. Usefull for calculating text box size.
+ */
+export const SvgTextRect: React.FC<TSvgTextRectProps> = (props) => {
+  const {
+    onRectChanged = () => { },
+  } = props;
+
+  const textRef = useRef<SVGTextElement>(null);
+
+  useEffect(() => {
+    const rect = textRef.current?.getBBox();
+    if (!rect) return;
+
+    onRectChanged(rect);
+  }, [props.children]);
+
+  return <>
+    <text {...props} ref={textRef} />
+  </>;
 };
+
+//#endregion svg helpers
+
 
 const BarBackground: FunctionComponent<{
-  theme: Required<IGaugeTheme>,
+  theme: Required<GaugeMiniLayerConfig>,
   colors: Colors,
   barWidth: number,
   getFrac: (x: number) => number,
@@ -136,7 +137,7 @@ const BarBackground: FunctionComponent<{
 };
 
 const BarValue: FunctionComponent<{
-  theme: Required<IGaugeTheme>,
+  theme: Required<GaugeMiniLayerConfig>,
   gaugeBarValueWidth: number,
   colors: Colors,
   value: number,
@@ -169,7 +170,7 @@ const BarValue: FunctionComponent<{
       })()
     )
       ?.brighter(1)
-      .formatHex()
+      .hex()
     ;
 
   return <>
@@ -178,7 +179,7 @@ const BarValue: FunctionComponent<{
 };
 
 const Bar: FunctionComponent<{
-  value: number, theme: Required<IGaugeTheme>, barWidth: number, y: number, getFrac: (x: number) => number,
+  value: number, theme: Required<GaugeMiniLayerConfig>, barWidth: number, y: number, getFrac: (x: number) => number,
 }> = ({ value, theme, y, barWidth, getFrac, }) => {
   const { gaugeHeight, valueHeight } = theme;
 
@@ -207,7 +208,7 @@ const Bar: FunctionComponent<{
 };
 
 const Text: FunctionComponent<{
-  theme: Required<IGaugeTheme>,
+  theme: Required<GaugeMiniLayerConfig>,
   gaugeBarValueWidth: number,
   colors: Colors,
   value: number,
@@ -245,7 +246,7 @@ const Text: FunctionComponent<{
 };
 
 const Axes: FunctionComponent<{
-  theme: Required<IGaugeTheme>, barWidth: number, y: number, getFrac: (x: number) => number,
+  theme: Required<GaugeMiniLayerConfig>, barWidth: number, y: number, getFrac: (x: number) => number,
 }> = ({ theme, barWidth, y, getFrac, }) => {
   const { textColor: axesColor, axesSteps, axesStrokeWidth, formaters } = theme;
 
@@ -329,7 +330,7 @@ const AutoCenterGroup: FunctionComponent<{ enabled?: boolean, refreshToken?: num
     // we use this function because we want to know how much we are in negative direction
     const box = g?.getBBox();
     // we use this function because we want to have fixed parent width/height
-    const boxParent = (g?.parentElement as SVGGraphicsElement | undefined)?.getBoundingClientRect();
+    const boxParent = (g?.parentElement as any as SVGGraphicsElement | undefined)?.getBoundingClientRect();
 
     if (!box || !boxParent)
       return;
@@ -396,7 +397,7 @@ export const GaugeMini: FunctionComponent<IProps> = ({ value, theme, width, heig
         })}
         <Axes {...{ barWidth, theme, value, y: allBarsHeight + barPaddings, getFrac }} />
         <g {...t(gaugePaddingSides, 0)}>
-          {colors.targets.map(({ value, hex }) => {
+          {/* {colors.targets.map(({ value, hex }) => {
             const posX = barWidth * ((value - colors.min.value) / colorLen);
 
             return <>
@@ -415,7 +416,7 @@ export const GaugeMini: FunctionComponent<IProps> = ({ value, theme, width, heig
                 {value}
               </text>
             </>;
-          })}
+          })} */}
         </g>
       </AutoCenterGroup>
     </svg>
