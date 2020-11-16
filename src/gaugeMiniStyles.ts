@@ -18,9 +18,7 @@ export const GAUGE_MINI_BULLET_THEME_DARK: Required<GaugeMiniLayerConfig> = {
   ] as Color[],
   colorSecondary: InfluxColors.Kevlar,
   textMode: "follow",
-
   axesSteps: "thresholds",
-  axesStrokeWidth: "2px",
   barPaddings: 5,
   labelMain: "",
   labelBars: [],
@@ -68,7 +66,6 @@ export const GAUGE_MINI_PROGRESS_THEME_DARK: Required<GaugeMiniLayerConfig> = {
     axes: (val: number) => val.toFixed(0),
     barValue: (val: number) => val.toFixed(0),
   },
-  axesStrokeWidth: "2px",
   barPaddings: 5,
   gaugePaddingSides: 20,
 };

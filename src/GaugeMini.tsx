@@ -36,7 +36,6 @@ export interface GaugeMiniLayerConfig {
   valueFontColorOutside?: string;
   valueFontColorInside?: string;
   valueFontSize?: number;
-  axesStrokeWidth?: string | number;
   labelMain?: string;
   labelBars?: { _field: string, label: string }[];
   axesSteps?: number | "thresholds" | undefined | number[];
@@ -266,7 +265,7 @@ const Text: FunctionComponent<{
 const Axes: FunctionComponent<{
   theme: Required<GaugeMiniLayerConfig>, barWidth: number, y: number, getFrac: (x: number) => number,
 }> = ({ theme, barWidth, y, getFrac, }) => {
-  const { axesSteps, axesStrokeWidth, formaters, axesFontColor, axesFontSize } = theme;
+  const { axesSteps, formaters, axesFontColor, axesFontSize } = theme;
 
   if (axesSteps === undefined || axesSteps === null) return <></>;
 
@@ -274,7 +273,7 @@ const Axes: FunctionComponent<{
 
   const colorLen = (colors.max.value - colors.min.value);
 
-  const axesLineStyle = { stroke: axesFontColor, strokeWidth: axesStrokeWidth };
+  const axesLineStyle = { stroke: axesFontColor, strokeWidth: 2 };
 
   const axesValuesArray =
     Array.isArray(axesSteps) ? axesSteps
@@ -306,7 +305,9 @@ const Axes: FunctionComponent<{
   return <>
     <g {...t(0, y)}>
       <line x2={barWidth}
-        style={axesLineStyle} />
+        style={axesLineStyle}
+        stroke-linecap="round"
+      />
       {points.map(({ anchor, lineLength, value }, i) => {
         const posX = getFrac(value) * barWidth;
         const text = formaters.axes(value);
@@ -315,6 +316,7 @@ const Axes: FunctionComponent<{
             <line
               y2={lineLength}
               style={axesLineStyle}
+              stroke-linecap="round"
             />
             <text
               y={8}
