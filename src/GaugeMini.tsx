@@ -138,17 +138,26 @@ const BarBackground: FunctionComponent<{
 
   // todo: invalid HTML -> multiple same ID attribute possible
   // todo: move to svg root
-  const id = `rounded-bar-${barWidth}-${gaugeHeight}`;
+  const roundingDefId = `rounded-bar-${barWidth}-${gaugeHeight}`;
+  const gradientDefId = `gradient-${min.hex}-${max.hex}`;
 
   return <>
     <defs>
-      <clipPath id={id}>
+      <clipPath id={roundingDefId}>
         <rect rx={gaugeRounding} width={barWidth} height={gaugeHeight} />
       </clipPath>
+      <linearGradient id={gradientDefId} >
+        <stop offset="0%" stopColor={min.hex} />
+        <stop offset="100%" stopColor={max.hex} />
+      </linearGradient>
     </defs>
-    {colors.map(({ col, end, start }) =>
-      <rect height={gaugeHeight} x={barWidth * start} width={barWidth * (end - start)} fill={col} clipPath={`url(#${id})`} />
-    )}
+    {
+      thresholds.length === 0 && mode === "bullet"
+        ? <rect height={gaugeHeight} width={barWidth} fill={`url(#${gradientDefId})`} clipPath={`url(#${roundingDefId})`} />
+        : colors.map(({ col, end, start }) =>
+          <rect height={gaugeHeight} x={barWidth * start} width={barWidth * (end - start)} fill={col} clipPath={`url(#${roundingDefId})`} />
+        )
+    }
   </>;
 };
 
