@@ -26,6 +26,8 @@ export interface GaugeMiniLayerConfig {
   type: "gauge mini";
   valueHeight?: number;
   gaugeHeight?: number;
+  valueRounding?: number;
+  gaugeRounding?: number;
   gaugePaddingSides?: number;
   colorsAndTargets?: Color[];
   colorSecondary?: string;
@@ -110,7 +112,7 @@ const BarBackground: FunctionComponent<{
   barWidth: number,
   getFrac: (x: number) => number,
 }> = ({ theme, colors: { max, min, secondary, thresholds }, barWidth, getFrac }) => {
-  const { gaugeHeight, mode } = theme;
+  const { gaugeHeight, mode, gaugeRounding } = theme;
 
   const colors: { start: number, end: number, col: string }[] = [];
   if (mode === "progress") {
@@ -129,9 +131,18 @@ const BarBackground: FunctionComponent<{
     }
   }
 
+  // todo: invalid HTML -> multiple same ID attribute possible
+  // todo: move to svg root
+  const id = `rounded-bar-${barWidth}-${gaugeHeight}`;
+
   return <>
+    <defs>
+      <clipPath id={id}>
+        <rect rx={gaugeRounding} width={barWidth} height={gaugeHeight} />
+      </clipPath>
+    </defs>
     {colors.map(({ col, end, start }) =>
-      <rect height={gaugeHeight} x={barWidth * start} width={barWidth * (end - start)} fill={col} />
+      <rect height={gaugeHeight} x={barWidth * start} width={barWidth * (end - start)} fill={col} clipPath={`url(#${id})`} />
     )}
   </>;
 };
@@ -143,7 +154,7 @@ const BarValue: FunctionComponent<{
   value: number,
   valueFracFixed: number,
 }> = ({ colors, gaugeBarValueWidth, value, theme, valueFracFixed }) => {
-  const { valueHeight, gaugeHeight, mode } = theme;
+  const { valueHeight, gaugeHeight, mode, valueRounding } = theme;
   const colorModeGradient = colors.thresholds.length === 0;
 
   const colorValue = mode === "bullet"
@@ -174,7 +185,7 @@ const BarValue: FunctionComponent<{
     ;
 
   return <>
-    <rect height={valueHeight} width={Math.abs(gaugeBarValueWidth)} x={Math.sign(valueFracFixed) === -1 ? gaugeBarValueWidth : 0} y={(gaugeHeight - valueHeight) / 2} fill={colorValue as any} />
+    <rect rx={valueRounding} height={valueHeight} width={Math.abs(gaugeBarValueWidth)} x={Math.sign(valueFracFixed) === -1 ? gaugeBarValueWidth : 0} y={(gaugeHeight - valueHeight) / 2} fill={colorValue as any} />
   </>;
 };
 

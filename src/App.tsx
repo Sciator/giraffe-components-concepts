@@ -15,7 +15,7 @@ const gaugeTheme: Required<GaugeMiniLayerConfig> = ({
   formaters: {
     axes: (num: number) => num.toFixed(0) + "%",
     barValue: (num: number) => num.toFixed(0) + "%",
-  }
+  },
 });
 
 const gaugeTheme2: Required<GaugeMiniLayerConfig> = {

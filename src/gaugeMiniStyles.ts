@@ -3,43 +3,46 @@ import { GaugeMiniLayerConfig } from "./GaugeMini";
 import { Color } from "./types";
 
 export const GAUGE_MINI_BULLET_THEME_DARK: Required<GaugeMiniLayerConfig> = {
-  type: 'gauge mini',
-  mode: 'bullet',
+  type: "gauge mini",
+  mode: "bullet",
   valueHeight: 18,
   gaugeHeight: 25,
+  valueRounding: 1,
+  gaugeRounding: 3,
   gaugePaddingSides: 20,
   colorsAndTargets: [
-    {value: 0, type: 'min', hex: InfluxColors.Krypton},
-    {value: 50, type: 'threshold', hex: InfluxColors.Sulfur},
-    {value: 75, type: 'threshold', hex: InfluxColors.Topaz},
-    {value: 100, type: 'max', hex: InfluxColors.Topaz},
+    {value: 0, type: "min", hex: InfluxColors.Krypton},
+    {value: 50, type: "threshold", hex: InfluxColors.Sulfur},
+    {value: 75, type: "threshold", hex: InfluxColors.Topaz},
+    {value: 100, type: "max", hex: InfluxColors.Topaz},
   ] as Color[],
   colorSecondary: InfluxColors.Raven,
-  textMode: 'follow',
+  textMode: "follow",
   textColorBarOutside: InfluxColors.Raven,
   textColorBarInside: InfluxColors.Cloud,
   textColor: InfluxColors.Cloud,
-  axesSteps: 'thresholds',
-  axesStrokeWidth: '2px',
+  axesSteps: "thresholds",
+  axesStrokeWidth: "2px",
   barPaddings: 5,
-  labelMain: '',
+  labelMain: "",
   labelBars: [],
   formaters: {
     axes: (num: number) => num.toFixed(0),
     barValue: (num: number) => num.toFixed(0),
   },
-}
-
+};
 
 export const GAUGE_MINI_PROGRESS_THEME_DARK: Required<GaugeMiniLayerConfig> = {
-  type: 'gauge mini',
+  type: "gauge mini",
   valueHeight: 20,
   gaugeHeight: 20,
+  valueRounding: 3,
+  gaugeRounding: 3,
   mode: "progress",
   textMode: "follow",
   colorsAndTargets: [
-    {value: 0, type: 'min', hex: InfluxColors.Krypton},
-    {value: 100, type: 'max', hex: InfluxColors.Topaz},
+    {value: 0, type: "min", hex: InfluxColors.Krypton},
+    {value: 100, type: "max", hex: InfluxColors.Topaz},
   ] as Color[],
   textColor: InfluxColors.Cloud,
   textColorBarInside: InfluxColors.Raven,
@@ -52,8 +55,7 @@ export const GAUGE_MINI_PROGRESS_THEME_DARK: Required<GaugeMiniLayerConfig> = {
     axes: (val: number) => val.toFixed(0),
     barValue: (val: number) => val.toFixed(0),
   },
-  axesStrokeWidth: '2px',
+  axesStrokeWidth: "2px",
   barPaddings: 5,
   gaugePaddingSides: 20,
-}
-
+};
