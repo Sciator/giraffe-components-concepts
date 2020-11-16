@@ -203,8 +203,12 @@ const BarValue: FunctionComponent<{
   // todo: move styling out -> styling is now multiple times inserted
   return <>
   <style>{`
-    .${barCssClass}:hover .${className} {
+    .${barCssClass} .${className} {
+      transition: stroke-width 150ms ease-in;
       stroke: #ffffffcc;
+      stroke-width: 0;
+    }
+    .${barCssClass}:hover .${className} {
       stroke-width: 2;
     }
   `}
