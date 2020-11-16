@@ -36,20 +36,18 @@ export interface GaugeMiniLayerConfig {
   valueFontColorOutside?: string;
   valueFontColorInside?: string;
   valueFontSize?: number;
+  valueFormater?: (value: number) => string;
   labelMain?: string;
   labelBars?: { _field: string, label: string }[];
   axesSteps?: number | "thresholds" | undefined | number[];
   barPaddings?: number;
-  labelMainFontSize: number;
-  labelMainFontColor: string;
-  labelBarsFontSize: number;
-  labelBarsFontColor: string;
-  axesFontSize: number;
-  axesFontColor: string;
-  formaters?: {
-    barValue: (value: number) => string,
-    axes: (value: number) => string,
-  };
+  labelMainFontSize?: number;
+  labelMainFontColor?: string;
+  labelBarsFontSize?: number;
+  labelBarsFontColor?: string;
+  axesFontSize?: number;
+  axesFontColor?: string;
+  axesFormater: (value: number) => string;
 }
 
 
@@ -250,8 +248,8 @@ const Text: FunctionComponent<{
   colors: Colors,
   value: number,
 }> = ({ value, gaugeBarValueWidth, theme }) => {
-  const { valueFontColorInside, valueFontColorOutside, textMode, formaters, valueFontSize } = theme;
-  const textValue = formaters.barValue(value);
+  const { valueFontColorInside, valueFontColorOutside, textMode, valueFormater, valueFontSize } = theme;
+  const textValue = valueFormater(value);
 
   const [textBBox, setTextBBox] = useState<SVGRect | null>(null);
   const padding = 5;
@@ -286,7 +284,7 @@ const Text: FunctionComponent<{
 const Axes: FunctionComponent<{
   theme: Required<GaugeMiniLayerConfig>, barWidth: number, y: number, getFrac: (x: number) => number,
 }> = ({ theme, barWidth, y, getFrac, }) => {
-  const { axesSteps, formaters, axesFontColor, axesFontSize } = theme;
+  const { axesSteps, axesFormater, axesFontColor, axesFontSize } = theme;
 
   if (axesSteps === undefined || axesSteps === null) return <></>;
 
@@ -331,7 +329,7 @@ const Axes: FunctionComponent<{
       />
       {points.map(({ anchor, lineLength, value }, i) => {
         const posX = getFrac(value) * barWidth;
-        const text = formaters.axes(value);
+        const text = axesFormater(value);
         return <>
           <g {...t(posX, 0)} >
             <line

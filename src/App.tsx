@@ -12,10 +12,8 @@ const height = 200;
 const gaugeTheme: Required<GaugeMiniLayerConfig> = ({
   ...GAUGE_MINI_BULLET_THEME_DARK,
   labelMain: "Processor usage",
-  formaters: {
-    axes: (num: number) => num.toFixed(0) + "%",
-    barValue: (num: number) => num.toFixed(0) + "%",
-  },
+  axesFormater: (num: number) => num.toFixed(0) + "%",
+  valueFormater: (num: number) => num.toFixed(0) + "%",
 });
 
 const gaugeTheme2: Required<GaugeMiniLayerConfig> = {
@@ -34,11 +32,8 @@ const gaugeTheme2: Required<GaugeMiniLayerConfig> = {
     { _field: "_default", label: "CPU 1" },
   ],
   labelMain: "Loudness",
-  formaters: {
-    ...gaugeTheme.formaters,
-    axes: (val: number) => val.toFixed(0) + "dB",
-    barValue: (val: number) => val.toFixed(0) + "dB",
-  },
+  axesFormater: (val: number) => val.toFixed(0) + "dB",
+  valueFormater: (val: number) => val.toFixed(0) + "dB",
 };
 
 const App: FunctionComponent<any> = () => {

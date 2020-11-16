@@ -31,10 +31,8 @@ export const GAUGE_MINI_BULLET_THEME_DARK: Required<GaugeMiniLayerConfig> = {
   labelBarsFontColor: InfluxColors.Forge,
   axesFontSize: 11,
   axesFontColor: InfluxColors.Forge,
-  formaters: {
-    axes: (num: number) => num.toFixed(0),
-    barValue: (num: number) => num.toFixed(0),
-  },
+  axesFormater: (num: number) => num.toFixed(0),
+  valueFormater: (num: number) => num.toFixed(0),
 };
 
 export const GAUGE_MINI_PROGRESS_THEME_DARK: Required<GaugeMiniLayerConfig> = {
@@ -62,10 +60,8 @@ export const GAUGE_MINI_PROGRESS_THEME_DARK: Required<GaugeMiniLayerConfig> = {
   labelBarsFontColor: InfluxColors.Forge,
   axesFontSize: 11,
   axesFontColor: InfluxColors.Forge,
-  formaters: {
-    axes: (val: number) => val.toFixed(0),
-    barValue: (val: number) => val.toFixed(0),
-  },
   barPaddings: 5,
   gaugePaddingSides: 20,
+  valueFormater: (val: number) => val.toFixed(0),
+  axesFormater: (val: number) => val.toFixed(0),
 };
