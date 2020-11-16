@@ -111,6 +111,8 @@ export const SvgTextRect: React.FC<TSvgTextRectProps> = (props) => {
 //#endregion svg helpers
 
 
+const barCssClass = "gauge-mini-bar";
+
 const BarBackground: FunctionComponent<{
   theme: Required<GaugeMiniLayerConfig>,
   colors: Colors,
@@ -198,8 +200,18 @@ const BarValue: FunctionComponent<{
       .hex()
     ;
 
+  const className = "value-rect";
+
+  // todo: move styling out -> styling is now multiple times inserted
   return <>
-    <rect rx={valueRounding} height={valueHeight} width={Math.abs(gaugeBarValueWidth)} x={Math.sign(valueFracFixed) === -1 ? gaugeBarValueWidth : 0} y={(gaugeHeight - valueHeight) / 2} fill={colorValue as any} />
+  <style>{`
+    .${barCssClass}:hover .${className} {
+      stroke: #ffffffcc;
+      stroke-width: 2;
+    }
+  `}
+  </style>
+    <rect className={className}  rx={valueRounding} height={valueHeight} width={Math.abs(gaugeBarValueWidth)} x={Math.sign(valueFracFixed) === -1 ? gaugeBarValueWidth : 0} y={(gaugeHeight - valueHeight) / 2} fill={colorValue as any} />
   </>;
 };
 
@@ -221,7 +233,7 @@ const Bar: FunctionComponent<{
   const maxBarHeight = Math.max(gaugeHeight, valueHeight);
   const textCenter = y + maxBarHeight / 2;
 
-  return <>
+  return <g className={barCssClass}>
     <g {...t(0, gaugeBarY)}>
       <BarBackground {...{ colors, barWidth, theme, getFrac }} />
       <BarValue {...{ colors, gaugeBarValueWidth, theme, value, valueFracFixed }} />
@@ -229,7 +241,7 @@ const Bar: FunctionComponent<{
     <g {...t(0, textCenter)}>
       <Text {...{ centerY: y, colors, gaugeBarValueWidth, theme, value }} />
     </g>
-  </>;
+  </g>;
 };
 
 const Text: FunctionComponent<{
