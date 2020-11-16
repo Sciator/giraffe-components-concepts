@@ -33,14 +33,20 @@ export interface GaugeMiniLayerConfig {
   colorSecondary?: string;
   mode?: "progress" | "bullet";
   textMode?: "follow" | "left";
-  textColor?: string;
-  textColorBarOutside?: string;
-  textColorBarInside?: string;
+  valueFontColorOutside?: string;
+  valueFontColorInside?: string;
+  valueFontSize?: number;
   axesStrokeWidth?: string | number;
   labelMain?: string;
   labelBars?: { _field: string, label: string }[];
   axesSteps?: number | "thresholds" | undefined | number[];
   barPaddings?: number;
+  labelMainFontSize: number;
+  labelMainFontColor: string;
+  labelBarsFontSize: number;
+  labelBarsFontColor: string;
+  axesFontSize: number;
+  axesFontColor: string;
   formaters?: {
     barValue: (value: number) => string,
     axes: (value: number) => string,
@@ -224,7 +230,7 @@ const Text: FunctionComponent<{
   colors: Colors,
   value: number,
 }> = ({ value, gaugeBarValueWidth, theme }) => {
-  const { textColorBarInside, textColorBarOutside, textMode, formaters } = theme;
+  const { valueFontColorInside, valueFontColorOutside, textMode, formaters, valueFontSize } = theme;
   const textValue = formaters.barValue(value);
 
   const [textBBox, setTextBBox] = useState<SVGRect | null>(null);
@@ -238,8 +244,8 @@ const Text: FunctionComponent<{
     ;
 
   const textColor = textInside
-    ? textColorBarInside
-    : textColorBarOutside
+    ? valueFontColorInside
+    : valueFontColorOutside
     ;
 
   const x = textMode === "follow"
@@ -252,6 +258,7 @@ const Text: FunctionComponent<{
       onRectChanged={setTextBBox}
       x={x} fill={textColor} textAnchor={textAnchor}
       alignmentBaseline="central"
+      fontSize={valueFontSize}
     >{textValue}</SvgTextRect>
   </>;
 };
@@ -259,7 +266,7 @@ const Text: FunctionComponent<{
 const Axes: FunctionComponent<{
   theme: Required<GaugeMiniLayerConfig>, barWidth: number, y: number, getFrac: (x: number) => number,
 }> = ({ theme, barWidth, y, getFrac, }) => {
-  const { textColor: axesColor, axesSteps, axesStrokeWidth, formaters } = theme;
+  const { axesSteps, axesStrokeWidth, formaters, axesFontColor, axesFontSize } = theme;
 
   if (axesSteps === undefined || axesSteps === null) return <></>;
 
@@ -267,7 +274,7 @@ const Axes: FunctionComponent<{
 
   const colorLen = (colors.max.value - colors.min.value);
 
-  const axesLineStyle = { stroke: axesColor, strokeWidth: axesStrokeWidth };
+  const axesLineStyle = { stroke: axesFontColor, strokeWidth: axesStrokeWidth };
 
   const axesValuesArray =
     Array.isArray(axesSteps) ? axesSteps
@@ -313,7 +320,8 @@ const Axes: FunctionComponent<{
               y={8}
               textAnchor={anchor}
               alignmentBaseline="hanging"
-              fill={axesColor}
+              fill={axesFontColor}
+              fontSize={axesFontSize}
             >
               {text}
             </text>
@@ -356,7 +364,10 @@ const AutoCenterGroup: FunctionComponent<{ enabled?: boolean, refreshToken?: num
 };
 
 export const GaugeMini: FunctionComponent<IProps> = ({ value, theme, width, height }) => {
-  const { gaugeHeight, gaugePaddingSides, valueHeight, barPaddings, labelMain, labelBars, textColor } = theme;
+  const {
+    gaugeHeight, gaugePaddingSides, valueHeight, barPaddings, labelMain,
+    labelBars, labelMainFontSize, labelMainFontColor, labelBarsFontColor, labelBarsFontSize,
+  } = theme;
   const [barLabelsWidth] = useState<number[]>([]);
 
   const valueArray = Array.isArray(value) ? value : [{ _field: "_default", value }];
@@ -388,9 +399,9 @@ export const GaugeMini: FunctionComponent<IProps> = ({ value, theme, width, heig
     <svg width={width} height={height} style={{ fontFamily: "Rubik, monospace" }} >
       <AutoCenterGroup enabled={true} refreshToken={autocenterToken}>
         {labelMain &&
-          <text fill={textColor} y={-barPaddings * 2}>
-            {labelMain}
-          </text>
+          <text
+            fill={labelMainFontColor} y={-barPaddings * 2} fontSize={labelMainFontSize}
+          >{labelMain}</text>
         }
         {valueArray.map(({ _field, value }, i) => {
           const y = 0 + i * (maxBarHeight + barPaddings);
@@ -403,7 +414,11 @@ export const GaugeMini: FunctionComponent<IProps> = ({ value, theme, width, heig
 
           return <>
             <Bar {...{ barWidth, y, theme, value, getFrac }} />
-            <SvgTextRect onRectChanged={onRectChanged} fill={textColor} y={textCenter} x={-10} alignmentBaseline="central" textAnchor="end">{label}</SvgTextRect>
+            <SvgTextRect
+              onRectChanged={onRectChanged} y={textCenter} x={-10}
+              alignmentBaseline="central" textAnchor="end"
+              fontSize={labelBarsFontSize} fill={labelBarsFontColor}
+            >{label}</SvgTextRect>
           </>;
         })}
         <Axes {...{ barWidth, theme, value, y: allBarsHeight + barPaddings, getFrac }} />

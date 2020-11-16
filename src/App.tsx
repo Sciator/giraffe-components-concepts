@@ -20,17 +20,11 @@ const gaugeTheme: Required<GaugeMiniLayerConfig> = ({
 
 const gaugeTheme2: Required<GaugeMiniLayerConfig> = {
   ...GAUGE_MINI_PROGRESS_THEME_DARK,
-  valueHeight: 20,
-  gaugeHeight: 20,
   mode: "progress",
-  textMode: "follow",
   colorsAndTargets: [
     { ...gaugeTheme.colorsAndTargets.find(({ type }) => type === "min")!, value: 30 },
     { ...gaugeTheme.colorsAndTargets.find(({ type }) => type === "max")!, value: 130 },
   ],
-  textColorBarInside: InfluxColors.Raven,
-  textColorBarOutside: InfluxColors.Raven,
-  colorSecondary: InfluxColors.Chromium,
   axesSteps: [60, 85],
   labelBars: [
     { _field: "f1", label: "Room 1" },
