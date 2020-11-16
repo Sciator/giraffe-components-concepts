@@ -5,23 +5,6 @@ import { scaleLinear } from "d3-scale";
 import { range } from "d3-array";
 import { Color } from "./types";
 
-// todo: remove before minigauge release
-export const t = (x: number, y: number) => ({
-  transform: `translate(${x},${y})`,
-});
-
-
-const throwReturn = <T extends unknown>(msg: string): T => {
-  throw new Error(msg);
-};
-
-interface IProps {
-  width: number;
-  height: number;
-  value: number | { _field: string, value: number }[];
-  theme: Required<GaugeMiniLayerConfig>;
-}
-
 export interface GaugeMiniLayerConfig {
   type: "gauge mini";
   valueHeight?: number;
@@ -47,7 +30,24 @@ export interface GaugeMiniLayerConfig {
   labelBarsFontColor?: string;
   axesFontSize?: number;
   axesFontColor?: string;
-  axesFormater: (value: number) => string;
+  axesFormater?: (value: number) => string;
+}
+
+// todo: remove before minigauge release
+export const t = (x: number, y: number) => ({
+  transform: `translate(${x},${y})`,
+});
+
+
+const throwReturn = <T extends unknown>(msg: string): T => {
+  throw new Error(msg);
+};
+
+interface IProps {
+  width: number;
+  height: number;
+  value: number | { _field: string, value: number }[];
+  theme: Required<GaugeMiniLayerConfig>;
 }
 
 
@@ -105,6 +105,40 @@ export const SvgTextRect: React.FC<TSvgTextRectProps> = (props) => {
     <text {...props} ref={textRef} />
   </>;
 };
+
+
+const AutoCenterGroup: FunctionComponent<{ enabled?: boolean, refreshToken?: number | string } & React.SVGProps<SVGGElement>> = (props) => {
+  const { children, enabled = true, refreshToken = 0 } = props;
+  const ref = useRef<SVGGElement>(null);
+
+  const [x, setX] = useState(0);
+  const [y, setY] = useState(0);
+
+  useEffect(() => {
+    if (!enabled) {
+      setX(0);
+      setY(0);
+      return;
+    }
+
+    const g = ref.current;
+    // we use this function because we want to know how much we are in negative direction
+    const box = g?.getBBox();
+    // we use this function because we want to have fixed parent width/height
+    const boxParent = (g?.parentElement as any as SVGGraphicsElement | undefined)?.getBoundingClientRect();
+
+    if (!box || !boxParent)
+      return;
+
+    setX((boxParent.width - box.width) / 2 - box.x);
+    setY((boxParent.height - box.height) / 2 - box.y);
+  }, [refreshToken]);
+
+  return <g ref={ref} {...t(x, y)} {...props}>
+    {children}
+  </g>;
+};
+
 
 //#endregion svg helpers
 
@@ -202,7 +236,7 @@ const BarValue: FunctionComponent<{
 
   // todo: move styling out -> styling is now multiple times inserted
   return <>
-  <style>{`
+    <style>{`
     .${barCssClass} .${className} {
       transition: stroke-width 150ms ease-in;
       stroke: #ffffffcc;
@@ -212,8 +246,8 @@ const BarValue: FunctionComponent<{
       stroke-width: 2;
     }
   `}
-  </style>
-    <rect className={className}  rx={valueRounding} height={valueHeight} width={Math.abs(gaugeBarValueWidth)} x={Math.sign(valueFracFixed) === -1 ? gaugeBarValueWidth : 0} y={(gaugeHeight - valueHeight) / 2} fill={colorValue as any} />
+    </style>
+    <rect className={className} rx={valueRounding} height={valueHeight} width={Math.abs(gaugeBarValueWidth)} x={Math.sign(valueFracFixed) === -1 ? gaugeBarValueWidth : 0} y={(gaugeHeight - valueHeight) / 2} fill={colorValue as any} />
   </>;
 };
 
@@ -357,38 +391,6 @@ const Axes: FunctionComponent<{
   </>;
 };
 
-const AutoCenterGroup: FunctionComponent<{ enabled?: boolean, refreshToken?: number | string } & React.SVGProps<SVGGElement>> = (props) => {
-  const { children, enabled = true, refreshToken = 0 } = props;
-  const ref = useRef<SVGGElement>(null);
-
-  const [x, setX] = useState(0);
-  const [y, setY] = useState(0);
-
-  useEffect(() => {
-    if (!enabled) {
-      setX(0);
-      setY(0);
-      return;
-    }
-
-    const g = ref.current;
-    // we use this function because we want to know how much we are in negative direction
-    const box = g?.getBBox();
-    // we use this function because we want to have fixed parent width/height
-    const boxParent = (g?.parentElement as any as SVGGraphicsElement | undefined)?.getBoundingClientRect();
-
-    if (!box || !boxParent)
-      return;
-
-    setX((boxParent.width - box.width) / 2 - box.x);
-    setY((boxParent.height - box.height) / 2 - box.y);
-  }, [refreshToken]);
-
-  return <g ref={ref} {...t(x, y)} {...props}>
-    {children}
-  </g>;
-};
-
 export const GaugeMini: FunctionComponent<IProps> = ({ value, theme, width, height }) => {
   const {
     gaugeHeight, gaugePaddingSides, valueHeight, barPaddings, labelMain,
@@ -414,7 +416,7 @@ export const GaugeMini: FunctionComponent<IProps> = ({ value, theme, width, heig
   const [autocenterToken, setAutocenterToken] = useState(0);
   useEffect(() => {
     setAutocenterToken(autocenterToken + 1);
-  }, [barLabelsWidth, gaugePaddingSides, valueHeight]);
+  }, [barLabelsWidth, gaugePaddingSides, valueHeight, width, height]);
 
   /** return value as fraction 0->min 1->max */
   const getFrac = (val: number): number =>
@@ -423,7 +425,7 @@ export const GaugeMini: FunctionComponent<IProps> = ({ value, theme, width, heig
 
   return (
     <svg width={width} height={height} style={{ fontFamily: "Rubik, monospace" }} >
-      <AutoCenterGroup enabled={true} refreshToken={autocenterToken} style={{userSelect:"none"}}>
+      <AutoCenterGroup enabled={true} refreshToken={autocenterToken} style={{ userSelect: "none" }}>
         {labelMain &&
           <text
             fill={labelMainFontColor} y={-barPaddings * 2} fontSize={labelMainFontSize}
