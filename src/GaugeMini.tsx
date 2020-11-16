@@ -355,7 +355,8 @@ const Axes: FunctionComponent<{
   </>;
 };
 
-const AutoCenterGroup: FunctionComponent<{ enabled?: boolean, refreshToken?: number | string }> = ({ children, enabled = true, refreshToken = 0 }) => {
+const AutoCenterGroup: FunctionComponent<{ enabled?: boolean, refreshToken?: number | string } & React.SVGProps<SVGGElement>> = (props) => {
+  const { children, enabled = true, refreshToken = 0 } = props;
   const ref = useRef<SVGGElement>(null);
 
   const [x, setX] = useState(0);
@@ -381,7 +382,7 @@ const AutoCenterGroup: FunctionComponent<{ enabled?: boolean, refreshToken?: num
     setY((boxParent.height - box.height) / 2 - box.y);
   }, [refreshToken]);
 
-  return <g ref={ref} {...t(x, y)}>
+  return <g ref={ref} {...t(x, y)} {...props}>
     {children}
   </g>;
 };
@@ -420,7 +421,7 @@ export const GaugeMini: FunctionComponent<IProps> = ({ value, theme, width, heig
 
   return (
     <svg width={width} height={height} style={{ fontFamily: "Rubik, monospace" }} >
-      <AutoCenterGroup enabled={true} refreshToken={autocenterToken}>
+      <AutoCenterGroup enabled={true} refreshToken={autocenterToken} style={{userSelect:"none"}}>
         {labelMain &&
           <text
             fill={labelMainFontColor} y={-barPaddings * 2} fontSize={labelMainFontSize}
