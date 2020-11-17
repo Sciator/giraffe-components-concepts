@@ -18,4 +18,3 @@
  - Refactor code
 
 ### BUG: 
- - bullet mode background has to overlap, or page backgroud will make fake borders for all thresholds, same for value bar when is in front of background bar with same height and for start + end

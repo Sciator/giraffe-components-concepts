@@ -198,8 +198,8 @@ const BarBackground: FunctionComponent<{
     {
       thresholds.length === 0 && mode === "bullet"
         ? <rect height={gaugeHeight} width={barWidth} fill={`url(#${gradientDefId})`} clipPath={`url(#${roundingDefId})`} y={y} />
-        : colors.map(({ col, end, start }) =>
-          <rect height={gaugeHeight} x={barWidth * start} width={barWidth * (end - start)} fill={col} clipPath={`url(#${roundingDefId})`} y={y} />
+        : colors.reverse().map(({ col, end, start }, i) =>
+          <rect height={gaugeHeight} x={barWidth * start + (i=== 0 ? 0 : -.1)} width={barWidth * (end - start) + (i=== 0 ? 0 : +.1)} fill={col} clipPath={`url(#${roundingDefId})`} y={y} />
         )
     }
   </>;
