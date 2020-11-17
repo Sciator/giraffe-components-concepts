@@ -13,10 +13,9 @@
 ![01.jpg](./images/01.jpg)
 
 ## TODO:
+ - create default themes (dark/light - progress/bullet - interesting combinations)
+ - create gireffe tooltip
+ - Refactor code
 
 ### BUG: 
  - bullet mode background has to overlap, or page backgroud will make fake borders for all thresholds, same for value bar when is in front of background bar with same height and for start + end
-
-### Before giraffe release:
- - create default themes
- - create tooltip
