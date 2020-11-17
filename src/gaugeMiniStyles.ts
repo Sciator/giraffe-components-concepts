@@ -2,7 +2,7 @@ import { InfluxColors } from "@influxdata/clockface";
 import { GaugeMiniLayerConfig } from "./GaugeMini";
 import { Color } from "./types";
 
-export const GAUGE_MINI_BULLET_THEME_DARK: Required<GaugeMiniLayerConfig> = {
+export const GAUGE_MINI_THEME_BULLET_DARK: Required<GaugeMiniLayerConfig> = {
   type: "gauge mini",
   mode: "bullet",
   valueHeight: 18,
@@ -35,7 +35,7 @@ export const GAUGE_MINI_BULLET_THEME_DARK: Required<GaugeMiniLayerConfig> = {
   valueFormater: (num: number) => num.toFixed(0),
 };
 
-export const GAUGE_MINI_PROGRESS_THEME_DARK: Required<GaugeMiniLayerConfig> = {
+export const GAUGE_MINI_THEME_PROGRESS_DARK: Required<GaugeMiniLayerConfig> = {
   type: "gauge mini",
   valueHeight: 20,
   gaugeHeight: 20,

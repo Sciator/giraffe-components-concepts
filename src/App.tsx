@@ -4,20 +4,20 @@ import React, { useState, useEffect, FunctionComponent, useRef } from "react";
 import { InfluxColors } from "@influxdata/clockface";
 import { GaugeMini, GaugeMiniLayerConfig, getColors } from "./GaugeMini";
 import { Color } from "./types";
-import { GAUGE_MINI_BULLET_THEME_DARK, GAUGE_MINI_PROGRESS_THEME_DARK } from "./gaugeMiniStyles";
+import { GAUGE_MINI_THEME_BULLET_DARK, GAUGE_MINI_THEME_PROGRESS_DARK } from "./gaugeMiniStyles";
 
 const width = 300;
 const height = 200;
 
 const gaugeTheme: Required<GaugeMiniLayerConfig> = ({
-  ...GAUGE_MINI_BULLET_THEME_DARK,
+  ...GAUGE_MINI_THEME_BULLET_DARK,
   labelMain: "Processor usage",
   axesFormater: (num: number) => num.toFixed(0) + "%",
   valueFormater: (num: number) => num.toFixed(0) + "%",
 });
 
 const gaugeTheme2: Required<GaugeMiniLayerConfig> = {
-  ...GAUGE_MINI_PROGRESS_THEME_DARK,
+  ...GAUGE_MINI_THEME_PROGRESS_DARK,
   mode: "progress",
   colorsAndTargets: [
     { ...gaugeTheme.colorsAndTargets.find(({ type }) => type === "min")!, value: 30 },
@@ -62,8 +62,8 @@ const App: FunctionComponent<any> = () => {
     }}>
       <GaugeMini value={val} theme={gaugeTheme} {...{ width, height }} />
       <GaugeMini value={val} theme={gaugeTheme2} {...{ width, height }} />
-      <GaugeMini value={val} theme={GAUGE_MINI_BULLET_THEME_DARK} {...{ width, height }} />
-      <GaugeMini value={val} theme={GAUGE_MINI_PROGRESS_THEME_DARK} {...{ width, height }} />
+      <GaugeMini value={val} theme={GAUGE_MINI_THEME_BULLET_DARK} {...{ width, height }} />
+      <GaugeMini value={val} theme={GAUGE_MINI_THEME_PROGRESS_DARK} {...{ width, height }} />
       <GaugeMini value={[
         { _field: "f3", value: 12 },
         { _field: "f4", value: 98 },
