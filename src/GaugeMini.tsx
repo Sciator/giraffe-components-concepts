@@ -5,6 +5,7 @@ import { scaleLinear } from "d3-scale";
 import { range } from "d3-array";
 import { Color } from "./types";
 
+// todo: create validator
 export interface GaugeMiniLayerConfig {
   type: "gauge mini";
   valueHeight?: number;
@@ -150,7 +151,8 @@ const BarBackground: FunctionComponent<{
   colors: Colors,
   barWidth: number,
   getFrac: (x: number) => number,
-}> = ({ theme, colors: { max, min, secondary, thresholds }, barWidth, getFrac }) => {
+  barCenter: number,
+}> = ({ theme, colors: { max, min, secondary, thresholds }, barWidth, getFrac, barCenter }) => {
   const { gaugeHeight, mode, gaugeRounding } = theme;
 
   const colors: { start: number, end: number, col: string }[] = [];
@@ -170,6 +172,8 @@ const BarBackground: FunctionComponent<{
     }
   }
 
+  const y = barCenter - gaugeHeight / 2;
+
   // todo: invalid HTML -> multiple same ID attribute possible
   // todo: move to svg root
   const roundingDefId = `rounded-bar-${barWidth}-${gaugeHeight}`;
@@ -178,7 +182,7 @@ const BarBackground: FunctionComponent<{
   return <>
     <defs>
       <clipPath id={roundingDefId}>
-        <rect rx={gaugeRounding} width={barWidth} height={gaugeHeight} />
+        <rect rx={gaugeRounding} width={barWidth} height={gaugeHeight} y={y} />
       </clipPath>
       <linearGradient id={gradientDefId} >
         <stop offset="0%" stopColor={min.hex} />
@@ -187,9 +191,9 @@ const BarBackground: FunctionComponent<{
     </defs>
     {
       thresholds.length === 0 && mode === "bullet"
-        ? <rect height={gaugeHeight} width={barWidth} fill={`url(#${gradientDefId})`} clipPath={`url(#${roundingDefId})`} />
+        ? <rect height={gaugeHeight} width={barWidth} fill={`url(#${gradientDefId})`} clipPath={`url(#${roundingDefId})`} y={y} />
         : colors.map(({ col, end, start }) =>
-          <rect height={gaugeHeight} x={barWidth * start} width={barWidth * (end - start)} fill={col} clipPath={`url(#${roundingDefId})`} />
+          <rect height={gaugeHeight} x={barWidth * start} width={barWidth * (end - start)} fill={col} clipPath={`url(#${roundingDefId})`} y={y} />
         )
     }
   </>;
@@ -197,11 +201,12 @@ const BarBackground: FunctionComponent<{
 
 const BarValue: FunctionComponent<{
   theme: Required<GaugeMiniLayerConfig>,
-  gaugeBarValueWidth: number,
+  barValueWidth: number,
   colors: Colors,
   value: number,
   valueFracFixed: number,
-}> = ({ colors, gaugeBarValueWidth, value, theme, valueFracFixed }) => {
+  barCenter: number,
+}> = ({ colors, barValueWidth, value, theme, valueFracFixed, barCenter }) => {
   const { valueHeight, gaugeHeight, mode, valueRounding } = theme;
   const colorModeGradient = colors.thresholds.length === 0;
 
@@ -232,6 +237,9 @@ const BarValue: FunctionComponent<{
       .hex()
     ;
 
+  const y = barCenter - valueHeight / 2;
+  const x = Math.sign(valueFracFixed) === -1 ? barValueWidth : 0;
+
   const className = "value-rect";
 
   // todo: move styling out -> styling is now multiple times inserted
@@ -245,9 +253,8 @@ const BarValue: FunctionComponent<{
     .${barCssClass}:hover .${className} {
       stroke-width: 2;
     }
-  `}
-    </style>
-    <rect className={className} rx={valueRounding} height={valueHeight} width={Math.abs(gaugeBarValueWidth)} x={Math.sign(valueFracFixed) === -1 ? gaugeBarValueWidth : 0} y={(gaugeHeight - valueHeight) / 2} fill={colorValue as any} />
+  `}</style>
+    <rect className={className} rx={valueRounding} height={valueHeight} width={Math.abs(barValueWidth)} {...{ x, y }} fill={colorValue as any} />
   </>;
 };
 
@@ -264,35 +271,36 @@ const Bar: FunctionComponent<{
     ;
   const valueFracFixed = getFixedFrac(value);
 
-  const gaugeBarY = y;
-  const gaugeBarValueWidth = barWidth * valueFracFixed;
+  const barY = y;
+  const barValueWidth = barWidth * valueFracFixed;
   const maxBarHeight = Math.max(gaugeHeight, valueHeight);
-  const textCenter = y + maxBarHeight / 2;
+  const barCenter = maxBarHeight / 2;
 
   return <g className={barCssClass}>
-    <g {...t(0, gaugeBarY)}>
-      <BarBackground {...{ colors, barWidth, theme, getFrac }} />
-      <BarValue {...{ colors, gaugeBarValueWidth, theme, value, valueFracFixed }} />
-    </g>
-    <g {...t(0, textCenter)}>
-      <Text {...{ centerY: y, colors, gaugeBarValueWidth, theme, value }} />
+    <g {...t(0, barY)}>
+      <BarBackground {...{ colors, barWidth, theme, getFrac, barCenter }} />
+      <BarValue {...{ colors, barValueWidth, theme, value, valueFracFixed, barCenter }} />
+
+      <g {...t(0, barCenter)}>
+        <Text {...{ centerY: y, colors, barValueWidth, theme, value }} />
+      </g>
     </g>
   </g>;
 };
 
 const Text: FunctionComponent<{
   theme: Required<GaugeMiniLayerConfig>,
-  gaugeBarValueWidth: number,
+  barValueWidth: number,
   colors: Colors,
   value: number,
-}> = ({ value, gaugeBarValueWidth, theme }) => {
+}> = ({ value, barValueWidth, theme }) => {
   const { valueFontColorInside, valueFontColorOutside, textMode, valueFormater, valueFontSize } = theme;
   const textValue = valueFormater(value);
 
   const [textBBox, setTextBBox] = useState<SVGRect | null>(null);
   const padding = 5;
 
-  const textInside = (textBBox?.width ? textBBox?.width + padding * 2 : 0) < gaugeBarValueWidth;
+  const textInside = (textBBox?.width ? textBBox?.width + padding * 2 : 0) < barValueWidth;
 
   const textAnchor = (textInside && textMode === "follow")
     ? "end"
@@ -305,7 +313,7 @@ const Text: FunctionComponent<{
     ;
 
   const x = textMode === "follow"
-    ? Math.max(gaugeBarValueWidth + (textInside ? -padding : padding), padding)
+    ? Math.max(barValueWidth + (textInside ? -padding : padding), padding)
     : padding
     ;
 
