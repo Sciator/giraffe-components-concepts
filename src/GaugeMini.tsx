@@ -8,27 +8,33 @@ import { Color } from "./types";
 // todo: create validator
 export interface GaugeMiniLayerConfig {
   type: "gauge mini";
+  mode?: "progress" | "bullet";
+  textMode?: "follow" | "left";
+
   valueHeight?: number;
   gaugeHeight?: number;
   valueRounding?: number;
   gaugeRounding?: number;
-  gaugePaddingSides?: number;
-  colorsAndTargets?: Color[];
-  colorSecondary?: string;
-  mode?: "progress" | "bullet";
-  textMode?: "follow" | "left";
-  valueFontColorOutside?: string;
-  valueFontColorInside?: string;
-  valueFontSize?: number;
-  valueFormater?: (value: number) => string;
-  labelMain?: string;
-  labelBars?: { _field: string, label: string }[];
-  axesSteps?: number | "thresholds" | undefined | number[];
   barPaddings?: number;
+  sidePaddings?: number;
+
+  gaugeColors?: Color[];
+  colorSecondary?: string;
+
+  labelMain?: string;
   labelMainFontSize?: number;
   labelMainFontColor?: string;
+
+  labelBars?: { _field: string, label: string }[];
   labelBarsFontSize?: number;
   labelBarsFontColor?: string;
+
+  valueFontSize?: number;
+  valueFontColorInside?: string;
+  valueFontColorOutside?: string;
+  valueFormater?: (value: number) => string;
+
+  axesSteps?: number | "thresholds" | undefined | number[];
   axesFontSize?: number;
   axesFontColor?: string;
   axesFormater?: (value: number) => string;
@@ -63,7 +69,7 @@ export type Colors = {
 };
 
 export const getColors = (theme: Required<GaugeMiniLayerConfig>): Colors => {
-  const { colorSecondary: secondary, colorsAndTargets } = theme;
+  const { colorSecondary: secondary, gaugeColors: colorsAndTargets } = theme;
 
   colorsAndTargets.forEach(({ hex, name }) => d3Color(hex) ?? throwReturn(`Object "${hex}" isn"t valid color for name:${name}`));
 
@@ -401,7 +407,7 @@ const Axes: FunctionComponent<{
 
 export const GaugeMini: FunctionComponent<IProps> = ({ value, theme, width, height }) => {
   const {
-    gaugeHeight, gaugePaddingSides, valueHeight, barPaddings, labelMain,
+    gaugeHeight, sidePaddings: gaugePaddingSides, valueHeight, barPaddings, labelMain,
     labelBars, labelMainFontSize, labelMainFontColor, labelBarsFontColor, labelBarsFontSize,
   } = theme;
   const [barLabelsWidth] = useState<number[]>([]);
@@ -414,7 +420,6 @@ export const GaugeMini: FunctionComponent<IProps> = ({ value, theme, width, heig
 
   const barLabelWidth = Math.max(...barLabelsWidth) || 0;
 
-  const gaugeBarY = centerY - (gaugeHeight / 2);
   const barWidth = width - gaugePaddingSides * 2 - barLabelWidth;
 
   const maxBarHeight = Math.max(gaugeHeight, valueHeight);
@@ -458,28 +463,6 @@ export const GaugeMini: FunctionComponent<IProps> = ({ value, theme, width, heig
           </>;
         })}
         <Axes {...{ barWidth, theme, value, y: allBarsHeight + barPaddings, getFrac }} />
-        <g {...t(gaugePaddingSides, 0)}>
-          {/* {colors.targets.map(({ value, hex }) => {
-            const posX = barWidth * ((value - colors.min.value) / colorLen);
-
-            return <>
-              <line
-                style={{ stroke: hex, strokeWidth: "2px" }}
-                y1={gaugeBarY - 8} y2={gaugeBarY + gaugeHeight}
-                x1={posX} x2={posX}
-              />
-
-              <text
-                textAnchor="middle"
-                x={posX}
-                y={gaugeBarY - 10}
-                style={{ borderColor: hex, borderStyle: "solid", borderWidth: "2px" }}
-              >
-                {value}
-              </text>
-            </>;
-          })} */}
-        </g>
       </AutoCenterGroup>
     </svg>
   );

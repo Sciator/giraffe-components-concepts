@@ -9,8 +9,8 @@ export const GAUGE_MINI_THEME_BULLET_DARK: Required<GaugeMiniLayerConfig> = {
   gaugeHeight: 25,
   valueRounding: 2,
   gaugeRounding: 3,
-  gaugePaddingSides: 20,
-  colorsAndTargets: [
+  sidePaddings: 20,
+  gaugeColors: [
     {value: 0, type: "min", hex: InfluxColors.Krypton},
     {value: 50, type: "threshold", hex: InfluxColors.Sulfur},
     {value: 75, type: "threshold", hex: InfluxColors.Topaz},
@@ -43,7 +43,7 @@ export const GAUGE_MINI_THEME_PROGRESS_DARK: Required<GaugeMiniLayerConfig> = {
   gaugeRounding: 3,
   mode: "progress",
   textMode: "follow",
-  colorsAndTargets: [
+  gaugeColors: [
     {value: 0, type: "min", hex: InfluxColors.Krypton},
     {value: 100, type: "max", hex: InfluxColors.Topaz},
   ] as Color[],
@@ -61,7 +61,7 @@ export const GAUGE_MINI_THEME_PROGRESS_DARK: Required<GaugeMiniLayerConfig> = {
   axesFontSize: 11,
   axesFontColor: InfluxColors.Forge,
   barPaddings: 5,
-  gaugePaddingSides: 20,
+  sidePaddings: 20,
   valueFormater: (val: number) => val.toFixed(0),
   axesFormater: (val: number) => val.toFixed(0),
 };

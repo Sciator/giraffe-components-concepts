@@ -19,9 +19,9 @@ const gaugeTheme: Required<GaugeMiniLayerConfig> = ({
 const gaugeTheme2: Required<GaugeMiniLayerConfig> = {
   ...GAUGE_MINI_THEME_PROGRESS_DARK,
   mode: "progress",
-  colorsAndTargets: [
-    { ...gaugeTheme.colorsAndTargets.find(({ type }) => type === "min")!, value: 30 },
-    { ...gaugeTheme.colorsAndTargets.find(({ type }) => type === "max")!, value: 130 },
+  gaugeColors: [
+    { ...gaugeTheme.gaugeColors.find(({ type }) => type === "min")!, value: 30 },
+    { ...gaugeTheme.gaugeColors.find(({ type }) => type === "max")!, value: 130 },
   ],
   axesSteps: [60, 85],
   labelBars: [
