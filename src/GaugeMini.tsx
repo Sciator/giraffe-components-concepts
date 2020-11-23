@@ -3,49 +3,13 @@ import React, { FunctionComponent, useEffect, useRef, useState } from "react";
 import { color as d3Color } from "d3-color";
 import { scaleLinear } from "d3-scale";
 import { range } from "d3-array";
-import { Color } from "./types";
-
-export interface GaugeMiniLayerConfig {
-  type: "gauge mini";
-  mode?: "progress" | "bullet";
-  textMode?: "follow" | "left";
-
-  valueHeight?: number;
-  gaugeHeight?: number;
-  valueRounding?: number;
-  gaugeRounding?: number;
-  barPaddings?: number;
-  sidePaddings?: number;
-  oveflowFraction?: number;
-
-  gaugeColors?: Color[];
-  colorSecondary?: string;
-
-  labelMain?: string;
-  labelMainFontSize?: number;
-  labelMainFontColor?: string;
-
-  labelBars?: { _field: string, label: string }[];
-  labelBarsFontSize?: number;
-  labelBarsFontColor?: string;
-
-  valuePadding?: number;
-  valueFontSize?: number;
-  valueFontColorInside?: string;
-  valueFontColorOutside?: string;
-  valueFormater?: (value: number) => string;
-
-  axesSteps?: number | "thresholds" | undefined | number[];
-  axesFontSize?: number;
-  axesFontColor?: string;
-  axesFormater?: (value: number) => string;
-}
+import { Color, GaugeMiniLayerConfig } from "./types";
 
 const throwReturn = <T extends unknown>(msg: string): T => {
   throw new Error(msg);
 };
 
-interface IProps {
+interface Props {
   width: number;
   height: number;
   value: number | { _field: string, value: number }[];
@@ -98,7 +62,9 @@ export const SvgTextRect: React.FC<TSvgTextRectProps> = (props) => {
 
   useEffect(() => {
     const rect = textRef.current?.getBBox();
-    if (!rect) return;
+    if (!rect) {
+      return;
+    }
 
     onRectChanged(rect);
   }, [props.children]);
@@ -132,8 +98,9 @@ const AutoCenterGroup: FunctionComponent<{ enabled?: boolean, refreshToken?: num
     // we use this function because we want to have fixed parent width/height
     const boxParent = (g?.parentElement as any as SVGGraphicsElement | undefined)?.getBoundingClientRect();
 
-    if (!box || !boxParent)
+    if (!box || !boxParent) {
       return;
+    }
 
     setX((boxParent.width - box.width) / 2 - box.x);
     setY((boxParent.height - box.height) / 2 - box.y);
@@ -152,7 +119,7 @@ const AutoCenterGroup: FunctionComponent<{ enabled?: boolean, refreshToken?: num
 
 //#region types
 
-type IBarBackgroundProps = {
+type BarBackgroundProps = {
   theme: Required<GaugeMiniLayerConfig>,
   colors: Colors,
   barWidth: number,
@@ -160,7 +127,7 @@ type IBarBackgroundProps = {
   barCenter: number,
 };
 
-type IBarValueProps = {
+type BarValueProps = {
   theme: Required<GaugeMiniLayerConfig>,
   barValueWidth: number,
   colors: Colors,
@@ -169,25 +136,25 @@ type IBarValueProps = {
   barCenter: number,
 };
 
-type ITextProps = {
+type TextProps = {
   theme: Required<GaugeMiniLayerConfig>,
   barValueWidth: number,
   colors: Colors,
   value: number,
 };
 
-type IBarProps = {
+type BarProps = {
   value: number, theme: Required<GaugeMiniLayerConfig>, barWidth: number, y: number, getFrac: (x: number) => number,
 };
 
-type IAxesProps = {
+type AxesProps = {
   theme: Required<GaugeMiniLayerConfig>, barWidth: number, y: number, getFrac: (x: number) => number,
 };
 
 //#endregion types
 
 
-const BarBackground: FunctionComponent<IBarBackgroundProps> = ({ theme, colors: { max, min, secondary, thresholds }, barWidth, getFrac, barCenter }) => {
+const BarBackground: FunctionComponent<BarBackgroundProps> = ({ theme, colors: { max, min, secondary, thresholds }, barWidth, getFrac, barCenter }) => {
   const { gaugeHeight, mode, gaugeRounding } = theme;
 
   const y = barCenter - gaugeHeight / 2;
@@ -229,13 +196,13 @@ const BarBackground: FunctionComponent<IBarBackgroundProps> = ({ theme, colors: 
       thresholds.length === 0 && mode === "bullet"
         ? <rect height={gaugeHeight} width={barWidth} fill={`url(#${gradientDefId})`} clipPath={`url(#${roundingDefId})`} y={y} />
         : segments.reverse().map(({ hex: col, end, start }, i) =>
-          <rect height={gaugeHeight} x={barWidth * start + (i === 0 ? 0 : -.1)} width={barWidth * (end - start) + (i === 0 ? 0 : +.1)} fill={col} clipPath={`url(#${roundingDefId})`} y={y} />
+          <rect key={i} height={gaugeHeight} x={barWidth * start + (i === 0 ? 0 : -.1)} width={barWidth * (end - start) + (i === 0 ? 0 : +.1)} fill={col} clipPath={`url(#${roundingDefId})`} y={y} />
         )
     }
   </>;
 };
 
-const BarValue: FunctionComponent<IBarValueProps> = ({ colors, barValueWidth, value, theme, valueFracFixed, barCenter }) => {
+const BarValue: FunctionComponent<BarValueProps> = ({ colors, barValueWidth, value, theme, valueFracFixed, barCenter }) => {
   const { valueHeight, mode, valueRounding } = theme;
   const colorModeGradient = colors.thresholds.length === 0;
 
@@ -287,7 +254,7 @@ const BarValue: FunctionComponent<IBarValueProps> = ({ colors, barValueWidth, va
   </>;
 };
 
-const Text: FunctionComponent<ITextProps> = ({ value, barValueWidth, theme }) => {
+const Text: FunctionComponent<TextProps> = ({ value, barValueWidth, theme }) => {
   const { valueFontColorInside, valueFontColorOutside, textMode, valueFormater, valueFontSize: fontSize, valuePadding } = theme;
   const textValue = valueFormater(value);
   const follow = textMode === "follow";
@@ -322,7 +289,7 @@ const Text: FunctionComponent<ITextProps> = ({ value, barValueWidth, theme }) =>
   </>;
 };
 
-const Bar: FunctionComponent<IBarProps> = ({ value, theme, y, barWidth, getFrac, }) => {
+const Bar: FunctionComponent<BarProps> = ({ value, theme, y, barWidth, getFrac, }) => {
   const { gaugeHeight, valueHeight, oveflowFraction } = theme;
 
   const colors = getColors(theme);
@@ -346,7 +313,7 @@ const Bar: FunctionComponent<IBarProps> = ({ value, theme, y, barWidth, getFrac,
   </g>;
 };
 
-const Axes: FunctionComponent<IAxesProps> = ({ theme, barWidth, y, getFrac, }) => {
+const Axes: FunctionComponent<AxesProps> = ({ theme, barWidth, y, getFrac, }) => {
   const { axesSteps, axesFormater, axesFontColor, axesFontSize } = theme;
 
   if (axesSteps === undefined || axesSteps === null) {
@@ -395,8 +362,8 @@ const Axes: FunctionComponent<IAxesProps> = ({ theme, barWidth, y, getFrac, }) =
       <line x2={barWidth}
         style={axesLineStyle}
       />
-      {points.map(({ posX, lineLength, anchor, text }) =>
-        <g transform={`translate(${posX},${0})`} >
+      {points.map(({ posX, lineLength, anchor, text }, i) =>
+        <g key={i} transform={`translate(${posX},${0})`} >
           <line
             y2={lineLength}
             style={axesLineStyle}
@@ -419,7 +386,7 @@ const Axes: FunctionComponent<IAxesProps> = ({ theme, barWidth, y, getFrac, }) =
 //#endregion subcomponents
 
 
-export const GaugeMini: FunctionComponent<IProps> = ({ value, theme, width, height }) => {
+export const GaugeMini: FunctionComponent<Props> = ({ value, theme, width, height }) => {
   const {
     gaugeHeight, sidePaddings, valueHeight, barPaddings, labelMain,
     labelBars, labelMainFontSize, labelMainFontColor, labelBarsFontColor, labelBarsFontSize,
