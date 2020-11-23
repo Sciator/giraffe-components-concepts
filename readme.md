@@ -13,8 +13,6 @@
 ![01.jpg](./images/01.jpg)
 
 ## TODO:
- - value formater
- - create more default themes (dark/light - progress/bullet - interesting combinations)
  - create gireffe tooltip?
 
 ### BUG: 

@@ -401,9 +401,9 @@ export const GaugeMini: FunctionComponent<Props> = ({ value, theme, width, heigh
   const maxBarHeight = Math.max(gaugeHeight, valueHeight);
   const allBarsHeight = valueArray.length * (maxBarHeight + barPaddings);
 
-  const [autocenterToken, setAutocenterToken] = useState(0)
+  const [autocenterToken, setAutocenterToken] = useState(0);
   useEffect(() => {
-    setAutocenterToken(autocenterToken + 1)
+    setAutocenterToken(autocenterToken + 1);
   }, [barLabelWidth, sidePaddings, valueHeight, width, height]);
 
   /** return value as fraction 0->min 1->max */
