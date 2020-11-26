@@ -1,9 +1,9 @@
 // tslint:disable: no-non-null-assertion
-import React, { useState, useEffect, FunctionComponent, useRef } from "react";
+import React, { useState, useEffect, FunctionComponent } from "react";
 
 import { InfluxColors } from "@influxdata/clockface";
-import { GaugeMini, GaugeMiniLayerConfig, getColors } from "./GaugeMini";
-import { Color } from "./types";
+import { GaugeMini, getColors } from "./GaugeMini";
+import { GaugeMiniLayerConfig } from "./types";
 import { GAUGE_MINI_THEME_BULLET_DARK, GAUGE_MINI_THEME_PROGRESS_DARK } from "./gaugeMiniStyles";
 
 const width = 300;
@@ -24,12 +24,11 @@ const gaugeTheme2: Required<GaugeMiniLayerConfig> = {
     { ...gaugeTheme.gaugeColors.find(({ type }) => type === "max")!, value: 130 },
   ],
   axesSteps: [60, 85],
-  labelBars: [
+  bars: [
     { _field: "f1", label: "Room 1" },
     { _field: "f2", label: "Room 2" },
     { _field: "f3", label: "Room 3" },
     { _field: "f4", label: "Yard" },
-    { _field: "_default", label: "CPU 1" },
   ],
   labelMain: "Loudness",
   axesFormater: (val: number) => val.toFixed(0) + "dB",
@@ -41,16 +40,14 @@ const App: FunctionComponent<any> = () => {
 
   const [val, setVal] = useState(min - 20);
 
-  const loop = () => {
+  useEffect(() => {
     setTimeout(() => {
       let newVal = val + 1;
       if (newVal > max + 100)
         newVal = min - 100;
       setVal(newVal);
     }, 10);
-  };
-
-  useEffect(() => loop(), [val]);
+  }, [val, max, min]);
 
   return (
     <div className="App" style={{

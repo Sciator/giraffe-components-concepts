@@ -67,7 +67,7 @@ export const SvgTextRect: React.FC<TSvgTextRectProps> = (props) => {
     }
 
     onRectChanged(rect);
-  }, [props.children]);
+  }, [props.children, onRectChanged]);
 
   return <>
     <text {...props} ref={textRef} />
@@ -104,7 +104,7 @@ const AutoCenterGroup: FunctionComponent<{ enabled?: boolean, refreshToken?: num
 
     setX((boxParent.width - box.width) / 2 - box.x);
     setY((boxParent.height - box.height) / 2 - box.y);
-  }, [refreshToken]);
+  }, [refreshToken, enabled]);
 
   return <g ref={ref} transform={`translate(${x},${y})`} {...props}>
     {children}
@@ -388,12 +388,12 @@ const Axes: FunctionComponent<AxesProps> = ({ theme, barWidth, y, getFrac, }) =>
 
 export const GaugeMini: FunctionComponent<Props> = ({ value, theme, width, height }) => {
   const {
-    gaugeHeight, sidePaddings, valueHeight, barPaddings, labelMain,
-    labelBars, labelMainFontSize, labelMainFontColor, labelBarsFontColor, labelBarsFontSize,
+    gaugeHeight, sidePaddings, valueHeight, bars, barPaddings, labelMain,
+    labelMainFontSize, labelMainFontColor, labelBarsFontColor, labelBarsFontSize,
   } = theme;
   const [barLabelsWidth] = useState<number[]>([]);
 
-  const valueArray = Array.isArray(value) ? value : [{ _field: "_default", value }];
+  const valueArray = Array.isArray(value) ? value : [{ _field: "", value }];
   const colors = getColors(theme);
   const colorLen = (colors.max.value - colors.min.value);
   const barLabelWidth = Math.max(...barLabelsWidth) || 0;
@@ -403,7 +403,7 @@ export const GaugeMini: FunctionComponent<Props> = ({ value, theme, width, heigh
 
   const [autocenterToken, setAutocenterToken] = useState(0);
   useEffect(() => {
-    setAutocenterToken(autocenterToken + 1);
+    setAutocenterToken(x => x + 1);
   }, [barLabelWidth, sidePaddings, valueHeight, width, height]);
 
   /** return value as fraction 0->min 1->max */
@@ -421,7 +421,7 @@ export const GaugeMini: FunctionComponent<Props> = ({ value, theme, width, heigh
         }
         {valueArray.map(({ _field, value }, i) => {
           const y = 0 + i * (maxBarHeight + barPaddings);
-          const label = labelBars?.find(({ _field: f }) => f === _field)?.label;
+          const label = bars?.find(({ _field: f }) => f === _field)?.label;
 
           const textCenter = y + maxBarHeight / 2;
 

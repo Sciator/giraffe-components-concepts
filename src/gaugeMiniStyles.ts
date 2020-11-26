@@ -1,11 +1,11 @@
 import { InfluxColors } from "@influxdata/clockface";
-import { GaugeMiniLayerConfig } from "./GaugeMini";
-import { Color } from "./types";
+import { Color, GaugeMiniLayerConfig } from "./types";
 
 export const GAUGE_MINI_THEME_BULLET_DARK: Required<GaugeMiniLayerConfig> = {
   type: "gauge mini",
   mode: "bullet",
   textMode: "follow",
+  bars: [],
 
   valueHeight: 18,
   gaugeHeight: 25,
@@ -27,7 +27,6 @@ export const GAUGE_MINI_THEME_BULLET_DARK: Required<GaugeMiniLayerConfig> = {
   labelMainFontSize: 13,
   labelMainFontColor: InfluxColors.Ghost,
 
-  labelBars: [],
   labelBarsFontSize: 11,
   labelBarsFontColor: InfluxColors.Forge,
 
@@ -47,6 +46,7 @@ export const GAUGE_MINI_THEME_PROGRESS_DARK: Required<GaugeMiniLayerConfig> = {
   type: "gauge mini",
   mode: "progress",
   textMode: "follow",
+  bars: [],
 
   valueHeight: 20,
   gaugeHeight: 20,
@@ -66,7 +66,6 @@ export const GAUGE_MINI_THEME_PROGRESS_DARK: Required<GaugeMiniLayerConfig> = {
   labelMainFontSize: 13,
   labelMainFontColor: InfluxColors.Ghost,
 
-  labelBars: [],
   labelBarsFontSize: 11,
   labelBarsFontColor: InfluxColors.Forge,
 

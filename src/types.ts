@@ -10,6 +10,7 @@ export type Color = {
 
 export interface GaugeMiniLayerConfig {
   type: "gauge mini";
+  bars?: { _field: string, label?: string }[];
   mode?: "progress" | "bullet";
   textMode?: "follow" | "left";
 
@@ -28,7 +29,6 @@ export interface GaugeMiniLayerConfig {
   labelMainFontSize?: number;
   labelMainFontColor?: string;
 
-  labelBars?: { _field: string, label: string }[];
   labelBarsFontSize?: number;
   labelBarsFontColor?: string;
 
