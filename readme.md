@@ -9,7 +9,7 @@
 
 # Bullet graph - Mini gauge _(progress-bar)_
 
-## Current state:
+## <img src="./images/icon.jpg" height="60" /> Current state:
 ![01.jpg](./images/01.jpg)
 
 ## TODO:

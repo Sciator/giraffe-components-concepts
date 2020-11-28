@@ -159,7 +159,7 @@ const BarBackground: FunctionComponent<BarBackgroundProps> = ({ theme, colors: {
 
   const y = barCenter - gaugeHeight / 2;
   // todo: invalid HTML -> multiple same ID attribute possible
-  const roundingDefId = `rounded-bar-${barWidth}-${gaugeHeight}`;
+  const roundingDefId = `rounded-bar-w-${barWidth}-h-${gaugeHeight}-r-${gaugeRounding}`;
   const gradientDefId = `gradient-${min.hex}-${max.hex}`;
 
   type Segment = { start: number, end: number, hex: string };
@@ -182,6 +182,7 @@ const BarBackground: FunctionComponent<BarBackgroundProps> = ({ theme, colors: {
     segments.push({ start: 0, end: 1, hex: secondary });
   }
 
+  // todo: dont't render def linear gradient when is not used
   return <>
     <defs>
       <clipPath id={roundingDefId}>
