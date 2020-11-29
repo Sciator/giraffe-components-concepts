@@ -25,7 +25,7 @@ const gaugeTheme2: Required<GaugeMiniLayerConfig> = {
   ],
   axesSteps: [60, 85],
   barsDefinitions: {
-    splitByColumns: { "_field": true },
+    groupByColumns: { "_field": true },
     bars: [
       { barDef: { _field: "f1", }, label: "Room 1" },
       { barDef: { _field: "f2", }, label: "Room 2" },

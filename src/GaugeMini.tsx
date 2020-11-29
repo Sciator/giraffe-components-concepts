@@ -18,8 +18,8 @@ interface Props {
 
 
 /** create merged string for given column string values. String is same for all columns with same values and unique for different ones */
-export const createColsMString = <T extends { [key: string]: true }>(splitedBy: T, col: { [key in keyof T]: string }): string => {
-  const columns = Object.keys(splitedBy).sort();
+export const createColsMString = <T extends { [key: string]: true }>(groupedBy: T, col: { [key in keyof T]: string }): string => {
+  const columns = Object.keys(groupedBy).sort();
   const columnValues = columns.map(x => col[x]);
   /**
    * replacing - with -- will ensures that rows
@@ -407,19 +407,18 @@ export const GaugeMini: FunctionComponent<Props> = ({ values, theme, width, heig
   } = theme;
   const [barLabelsWidth] = useState<number[]>([]);
 
-  const valueArray = Array.isArray(values) ? values : [{ colsMString: "", value: values }];
   const colors = getColors(theme);
   const colorLen = (colors.max.value - colors.min.value);
   const barLabelWidth = Math.max(...barLabelsWidth) || 0;
   const barWidth = width - sidePaddings * 2 - barLabelWidth;
   const maxBarHeight = Math.max(gaugeHeight, valueHeight);
-  const allBarsHeight = valueArray.length * (maxBarHeight + barPaddings);
+  const allBarsHeight = values.length * (maxBarHeight + barPaddings);
 
-  const {splitByColumns} = barsDefinitions;
+  const {groupByColumns} = barsDefinitions;
   const labelMapping: any = {};
   barsDefinitions?.bars?.forEach(x=>{
     if (!x.label) return;
-    const mstring = createColsMString(splitByColumns, x.barDef);
+    const mstring = createColsMString(groupByColumns, x.barDef);
     labelMapping[mstring] = x.label;
   });
 
@@ -441,7 +440,7 @@ export const GaugeMini: FunctionComponent<Props> = ({ values, theme, width, heig
             fill={labelMainFontColor} y={-barPaddings * 2} fontSize={labelMainFontSize}
           >{labelMain}</text>
         }
-        {valueArray.map(({ colsMString, value }, i) => {
+        {values.map(({ colsMString, value }, i) => {
           const y = 0 + i * (maxBarHeight + barPaddings);
           const label = labelMapping?.[colsMString];
 
