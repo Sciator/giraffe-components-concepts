@@ -7,10 +7,18 @@ export type Color = {
   value: number
 };
 
+export interface GaugeMiniBarsDefinitions<T extends { [key: string]: true }> {
+  /** Defines which columns choose as unique bar indentificator.  */
+  splitByColumns: T;
+  // todo: allow regex ?
+  /** Give label for given unique column values */
+  bars?: { barDef: { [key in keyof T]: string }, label?: string }[];
+}
 
 export interface GaugeMiniLayerConfig {
   type: "gauge mini";
-  bars?: { _field: string, label?: string }[];
+  /** Defines which columns choose as unique bar indentificator. Also bar labels can be defined here. */
+  barsDefinitions: GaugeMiniBarsDefinitions<any>;
   mode?: "progress" | "bullet";
   textMode?: "follow" | "left";
 

@@ -24,12 +24,15 @@ const gaugeTheme2: Required<GaugeMiniLayerConfig> = {
     { ...gaugeTheme.gaugeColors.find(({ type }) => type === "max")!, value: 130 },
   ],
   axesSteps: [60, 85],
-  bars: [
-    { _field: "f1", label: "Room 1" },
-    { _field: "f2", label: "Room 2" },
-    { _field: "f3", label: "Room 3" },
-    { _field: "f4", label: "Yard" },
-  ],
+  barsDefinitions: {
+    splitByColumns: { "_field": true },
+    bars: [
+      { barDef: { _field: "f1", }, label: "Room 1" },
+      { barDef: { _field: "f2", }, label: "Room 2" },
+      { barDef: { _field: "f3", }, label: "Room 3" },
+      { barDef: { _field: "f4", }, label: "Yard" },
+    ],
+  },
   labelMain: "Loudness",
   axesFormater: (val: number) => val.toFixed(0) + "dB",
   valueFormater: (val: number) => val.toFixed(0) + "dB",
@@ -49,6 +52,8 @@ const App: FunctionComponent<any> = () => {
     }, 10);
   }, [val, max, min]);
 
+  const asVal = (value:number) => ([{ colsMString: "field0", value }]);
+
   return (
     <div className="App" style={{
       backgroundColor: InfluxColors.Castle,
@@ -57,30 +62,30 @@ const App: FunctionComponent<any> = () => {
       overflow: "auto",
       textAlign: "center",
     }}>
-      <GaugeMini value={val} theme={gaugeTheme} {...{ width, height }} />
-      <GaugeMini value={val} theme={gaugeTheme2} {...{ width, height }} />
-      <GaugeMini value={val} theme={GAUGE_MINI_THEME_BULLET_DARK} {...{ width, height }} />
-      <GaugeMini value={val} theme={GAUGE_MINI_THEME_PROGRESS_DARK} {...{ width, height }} />
-      <GaugeMini value={[
-        { _field: "f3", value: 12 },
-        { _field: "f4", value: 98 },
+      <GaugeMini values={asVal(val)} theme={gaugeTheme} {...{ width, height }} />
+      <GaugeMini values={asVal(val)} theme={gaugeTheme2} {...{ width, height }} />
+      <GaugeMini values={asVal(val)} theme={GAUGE_MINI_THEME_BULLET_DARK} {...{ width, height }} />
+      <GaugeMini values={asVal(val)} theme={GAUGE_MINI_THEME_PROGRESS_DARK} {...{ width, height }} />
+      <GaugeMini values={[
+        { colsMString: "f3", value: 12 },
+        { colsMString: "f4", value: 98 },
       ]} theme={gaugeTheme} {...{ width, height }} />
-      <GaugeMini value={[
-        { _field: "f1", value: 33 },
-        { _field: "f2", value: 56 },
-        { _field: "f3", value: 96 },
-        { _field: "f4", value: 120 },
+      <GaugeMini values={[
+        { colsMString: "f1", value: 33 },
+        { colsMString: "f2", value: 56 },
+        { colsMString: "f3", value: 96 },
+        { colsMString: "f4", value: 120 },
       ]} theme={gaugeTheme2} {...{ width, height }} />
-      <GaugeMini value={15} theme={gaugeTheme} {...{ width, height }} />
-      <GaugeMini value={25} theme={gaugeTheme} {...{ width, height }} />
-      <GaugeMini value={85} theme={gaugeTheme} {...{ width, height }} />
-      <GaugeMini value={96} theme={gaugeTheme} {...{ width, height }} />
-      <GaugeMini value={120} theme={gaugeTheme} {...{ width, height }} />
-      <GaugeMini value={15} theme={gaugeTheme2} {...{ width, height }} />
-      <GaugeMini value={18} theme={gaugeTheme2} {...{ width, height }} />
-      <GaugeMini value={85} theme={gaugeTheme2} {...{ width, height }} />
-      <GaugeMini value={96} theme={gaugeTheme2} {...{ width, height }} />
-      <GaugeMini value={120} theme={gaugeTheme2} {...{ width, height }} />
+      <GaugeMini values={asVal(15)} theme={gaugeTheme} {...{ width, height }} />
+      <GaugeMini values={asVal(25)} theme={gaugeTheme} {...{ width, height }} />
+      <GaugeMini values={asVal(85)} theme={gaugeTheme} {...{ width, height }} />
+      <GaugeMini values={asVal(96)} theme={gaugeTheme} {...{ width, height }} />
+      <GaugeMini values={asVal(120)} theme={gaugeTheme} {...{ width, height }} />
+      <GaugeMini values={asVal(15)} theme={gaugeTheme2} {...{ width, height }} />
+      <GaugeMini values={asVal(18)} theme={gaugeTheme2} {...{ width, height }} />
+      <GaugeMini values={asVal(85)} theme={gaugeTheme2} {...{ width, height }} />
+      <GaugeMini values={asVal(96)} theme={gaugeTheme2} {...{ width, height }} />
+      <GaugeMini values={asVal(120)} theme={gaugeTheme2} {...{ width, height }} />
     </div>
   );
 };
