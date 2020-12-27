@@ -21,10 +21,13 @@ const gaugeTheme: Required<GaugeMiniLayerConfig> = ({
 const gaugeTheme2: Required<GaugeMiniLayerConfig> = {
   ...GAUGE_MINI_THEME_PROGRESS_DARK,
   mode: "progress",
-  gaugeColors: [
-    { ...gaugeTheme.gaugeColors.find(({ type }) => type === "min")!, value: 30 },
-    { ...gaugeTheme.gaugeColors.find(({ type }) => type === "max")!, value: 130 },
-  ],
+  colors: Array.isArray(gaugeTheme.colors)
+    ? [
+      { ...gaugeTheme.colors.find(({ type }) => type === "min")!, value: 30 },
+      { ...gaugeTheme.colors.find(({ type }) => type === "max")!, value: 130 },
+    ]
+    : gaugeTheme.colors
+    ,
   axesSteps: [60, 85],
   barsDefinitions: {
     groupByColumns: { "_field": true },
@@ -87,7 +90,21 @@ const App: FunctionComponent<any> = () => {
       <GaugeMini values={asVal(85)} theme={gaugeTheme} {...{ width, height }} />
       <GaugeMini values={asVal(96)} theme={gaugeTheme} {...{ width, height }} />
       <GaugeMini values={asVal(120)} theme={gaugeTheme} {...{ width, height }} />
-      <GaugeMini values={asVal(15)} theme={gaugeTheme2} {...{ width, height }} />
+      <GaugeMini values={asVal(15)} theme={{
+        ...gaugeTheme2,
+        colors: {
+          min: {
+            value: 50,
+            hex: "#9aa445"
+          },
+          max: {
+            value: 150,
+            hex: "#E85B1C",
+          },
+          thresholds: [],
+          secondary: "#202028",
+        }
+      }} {...{ width, height }} />
       <GaugeMini values={asVal(18)} theme={gaugeTheme2} {...{ width, height }} />
       <GaugeMini values={asVal(85)} theme={gaugeTheme2} {...{ width, height }} />
       <GaugeMini values={asVal(96)} theme={gaugeTheme2} {...{ width, height }} />

@@ -15,7 +15,7 @@ export const GAUGE_MINI_THEME_BULLET_DARK: Required<GaugeMiniLayerConfig> = {
   sidePaddings: 20,
   oveflowFraction: .03,
 
-  gaugeColors: [
+  colors: [
     { value: 0, type: "min", hex: InfluxColors.Krypton },
     { value: 50, type: "threshold", hex: InfluxColors.Sulfur },
     { value: 75, type: "threshold", hex: InfluxColors.Topaz },
@@ -56,7 +56,7 @@ export const GAUGE_MINI_THEME_PROGRESS_DARK: Required<GaugeMiniLayerConfig> = {
   sidePaddings: 20,
   oveflowFraction: .03,
 
-  gaugeColors: [
+  colors: [
     { value: 0, type: "min", hex: InfluxColors.Krypton },
     { value: 100, type: "max", hex: InfluxColors.Topaz },
   ] as Color[],

@@ -13,6 +13,17 @@ export interface DecimalPlaces {
   digits?: number;
 }
 
+export type ColorHexValue = {
+  value: number,
+  hex: string,
+}
+export type GaugeMiniColors = {
+  min: ColorHexValue
+  max: ColorHexValue
+  secondary: string
+  thresholds?: ColorHexValue[]
+};
+
 export interface GaugeMiniBarsDefinitions<T extends { [key: string]: true }> {
   /** Defines which columns choose as unique bar indentificator.  */
   groupByColumns: T;
@@ -25,8 +36,6 @@ export interface GaugeMiniBarsDefinitionsArr {
   groupByColumns: string[];
   bars?: { barDef: string[], label?: string }[];
 }
-
-
 
 export interface GaugeMiniLayerConfig {
   type: "gauge mini";
@@ -43,7 +52,7 @@ export interface GaugeMiniLayerConfig {
   sidePaddings?: number;
   oveflowFraction?: number;
 
-  gaugeColors?: Color[];
+  colors?: Color[] | GaugeMiniColors;
   colorSecondary?: string;
 
   labelMain?: string;

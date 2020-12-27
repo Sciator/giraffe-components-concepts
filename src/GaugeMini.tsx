@@ -3,7 +3,7 @@ import React, { FunctionComponent, useEffect, useRef, useState } from "react";
 import { color as d3Color } from "d3-color";
 import { scaleLinear } from "d3-scale";
 import { range } from "d3-array";
-import { GaugeMiniBarsDefinitions, GaugeMiniBarsDefinitionsArr, GaugeMiniLayerConfig } from "./types";
+import { GaugeMiniColors, GaugeMiniBarsDefinitions, GaugeMiniBarsDefinitionsArr, GaugeMiniLayerConfig } from "./types";
 import { formatStatValue, FormatStatValueOptions } from "./formatStatValue";
 
 const throwReturn = <T extends unknown>(msg: string): T => {
@@ -67,19 +67,18 @@ const getBarsDefinitions = (barsDefinitions: GaugeMiniLayerConfig["barsDefinitio
 
 //#region colors
 
-export type ColorHexValue = {
-  value: number,
-  hex: string,
-}
-export type Colors = {
-  min: ColorHexValue
-  max: ColorHexValue
-  secondary: string
-  thresholds?: ColorHexValue[]
-};
+export const getColors = (theme: Required<GaugeMiniLayerConfig>): GaugeMiniColors => {
+  const { colorSecondary: secondary, colors: gaugeColors } = theme;
 
-export const getColors = (theme: Required<GaugeMiniLayerConfig>): Colors => {
-  const { colorSecondary: secondary, gaugeColors } = theme;
+  if (!Array.isArray(gaugeColors)) {
+    return {
+      ...gaugeColors,
+      thresholds: (gaugeColors
+        .thresholds
+        ?? [])
+        .sort(({ value: a }, { value: b }) => a - b)
+    };
+  }
 
   gaugeColors.forEach(
     ({ hex, name }) =>
@@ -190,7 +189,7 @@ const AutoCenterGroup: FunctionComponent<{
 
 type BarBackgroundProps = {
   theme: Required<GaugeMiniLayerConfig>
-  colors: Colors
+  colors: GaugeMiniColors
   barWidth: number
   getFrac: (x: number) => number
   barCenter: number
@@ -199,7 +198,7 @@ type BarBackgroundProps = {
 type BarValueProps = {
   theme: Required<GaugeMiniLayerConfig>
   barValueWidth: number
-  colors: Colors
+  colors: GaugeMiniColors
   value: number
   valueFracFixed: number
   barCenter: number
@@ -208,7 +207,7 @@ type BarValueProps = {
 type TextProps = {
   theme: Required<GaugeMiniLayerConfig>
   barValueWidth: number
-  colors: Colors
+  colors: GaugeMiniColors
   value: number
 };
 
@@ -479,6 +478,7 @@ const Axes: FunctionComponent<AxesProps> = ({ theme, barWidth, y, getFrac }) => 
     strokeLinecap: "round",
   };
 
+  // todo: filter axes values outside of min/max range warning if happens
   const axesValuesArray = Array.isArray(axesSteps)
     ? axesSteps
     : axesSteps === "thresholds"
