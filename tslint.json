@@ -62,7 +62,7 @@
     "no-non-null-assertion": false,
     "no-parameter-reassignment": true,
     "no-var-requires": true,
-    "ban-comma-operator": true,
+    "ban-comma-operator": false,
     "function-constructor": true,
     "label-position": true,
     "no-arg": true,

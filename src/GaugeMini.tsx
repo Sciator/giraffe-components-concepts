@@ -3,7 +3,8 @@ import React, { FunctionComponent, useEffect, useRef, useState } from "react";
 import { color as d3Color } from "d3-color";
 import { scaleLinear } from "d3-scale";
 import { range } from "d3-array";
-import { Color, GaugeMiniLayerConfig } from "./types";
+import { GaugeMiniBarsDefinitions, GaugeMiniBarsDefinitionsArr, GaugeMiniLayerConfig } from "./types";
+import { formatStatValue, FormatStatValueOptions } from "./formatStatValue";
 
 const throwReturn = <T extends unknown>(msg: string): T => {
   throw new Error(msg);
@@ -16,6 +17,8 @@ interface Props {
   theme: Required<GaugeMiniLayerConfig>;
 }
 
+
+// todo: move into gauge utils
 /** create merged string for given column string values. String is same for all columns with same values and unique for different ones */
 export const createColsMString = <T extends { [key: string]: true }>(
   groupedBy: T,
@@ -35,13 +38,44 @@ export const createColsMString = <T extends { [key: string]: true }>(
 
 const barCssClass = "gauge-mini-bar";
 
+const getFormater = (formater: ((value: number) => string) | FormatStatValueOptions): ((value: number) => string) =>
+  (typeof formater === "function")
+    ? formater
+    : (value: number) => formatStatValue(value, formater)
+  ;
+
+const isBarsDefinitionsArrayStyle = (barsDefinitions: GaugeMiniLayerConfig["barsDefinitions"]): barsDefinitions is GaugeMiniBarsDefinitionsArr => {
+  return Array.isArray(barsDefinitions.groupByColumns);
+};
+
+type TBarsDefinitions = GaugeMiniBarsDefinitions<{ [key: string]: true }>;
+const getBarsDefinitions = (barsDefinitions: GaugeMiniLayerConfig["barsDefinitions"]): TBarsDefinitions => {
+  if (!isBarsDefinitionsArrayStyle(barsDefinitions)) {
+    return barsDefinitions;
+  }
+
+  const { groupByColumns, bars } = barsDefinitions;
+
+  return {
+    groupByColumns: groupByColumns.reduce((obj, prop) => (obj[prop] = true, obj), {} as { [key: string]: true; }),
+    bars: bars?.map(x => ({
+      barDef: x.barDef.reduce((obj, prop, i) => (obj[prop] = groupByColumns[i], obj), {} as Required<TBarsDefinitions>["bars"][number]["barDef"]),
+      label: x.label,
+    })),
+  };
+};
+
 //#region colors
 
+export type ColorHexValue = {
+  value: number,
+  hex: string,
+}
 export type Colors = {
-  min: Color
-  max: Color
+  min: ColorHexValue
+  max: ColorHexValue
   secondary: string
-  thresholds: Color[]
+  thresholds?: ColorHexValue[]
 };
 
 export const getColors = (theme: Required<GaugeMiniLayerConfig>): Colors => {
@@ -203,7 +237,7 @@ type BarSegment = {
 
 const BarBackground: FunctionComponent<BarBackgroundProps> = ({
   theme,
-  colors: { max, min, secondary, thresholds },
+  colors: { max, min, secondary, thresholds = [] },
   barWidth,
   getFrac,
   barCenter,
@@ -288,7 +322,8 @@ const BarValue: FunctionComponent<BarValueProps> = ({
   barCenter,
 }) => {
   const { valueHeight, mode, valueRounding } = theme;
-  const colorModeGradient = colors.thresholds.length === 0;
+  const { min, max, secondary, thresholds = [] } = colors;
+  const colorModeGradient = thresholds.length === 0;
 
   const x = Math.sign(valueFracFixed) === -1 ? barValueWidth : 0;
   const y = barCenter - valueHeight / 2;
@@ -297,18 +332,18 @@ const BarValue: FunctionComponent<BarValueProps> = ({
 
   const colorValue =
     mode === "bullet"
-      ? colors.secondary
+      ? secondary
       : d3Color(
         (() => {
           if (colorModeGradient) {
             return scaleLinear()
-              .range([colors.min.hex, colors.max.hex] as any)
-              .domain([colors.min.value, colors.max.value])(value) as any;
+              .range([min.hex, max.hex] as any)
+              .domain([min.value, max.value])(value) as any;
           } else {
             const sortedColors = [
-              colors.min,
-              ...colors.thresholds,
-              colors.max,
+              min,
+              ...thresholds,
+              max,
             ];
             let i = 0;
             while (
@@ -360,7 +395,7 @@ const Text: FunctionComponent<TextProps> = ({ value, barValueWidth, theme }) => 
     valueFontSize: fontSize,
     valuePadding,
   } = theme;
-  const textValue = valueFormater(value);
+  const textValue = getFormater(valueFormater)(value);
   const follow = textMode === "follow";
 
   const [textBBox, setTextBBox] = useState<SVGRect | null>(null);
@@ -436,8 +471,8 @@ const Axes: FunctionComponent<AxesProps> = ({ theme, barWidth, y, getFrac }) => 
     return <></>;
   }
 
-  const colors = getColors(theme);
-  const colorLen = colors.max.value - colors.min.value;
+  const { min, max, thresholds = [] } = getColors(theme);
+  const colorLen = max.value - min.value;
   const axesLineStyle: React.CSSProperties = {
     stroke: axesFontColor,
     strokeWidth: 2,
@@ -447,10 +482,10 @@ const Axes: FunctionComponent<AxesProps> = ({ theme, barWidth, y, getFrac }) => 
   const axesValuesArray = Array.isArray(axesSteps)
     ? axesSteps
     : axesSteps === "thresholds"
-      ? colors.thresholds.map(x => x.value)
+      ? thresholds.map(x => x.value)
       : Number.isInteger(axesSteps)
         ? range(axesSteps).map(
-          x => ((x + 1) * colorLen) / (axesSteps + 1) + colors.min.value
+          x => ((x + 1) * colorLen) / (axesSteps + 1) + min.value
         )
         : throwReturn<number[]>(
           `${JSON.stringify(
@@ -472,12 +507,12 @@ const Axes: FunctionComponent<AxesProps> = ({ theme, barWidth, y, getFrac }) => 
     }))
     .concat([
       {
-        value: colors.min.value,
+        value: min.value,
         anchor: "start",
         lineLength: 3,
       },
       {
-        value: colors.max.value,
+        value: max.value,
         anchor: "end",
         lineLength: 3,
       },
@@ -485,7 +520,7 @@ const Axes: FunctionComponent<AxesProps> = ({ theme, barWidth, y, getFrac }) => 
     .map(x => ({
       ...x,
       posX: getFrac(x.value) * barWidth,
-      text: axesFormater(x.value),
+      text: getFormater(axesFormater)(x.value),
     }));
 
   return (
@@ -523,7 +558,6 @@ export const GaugeMini: FunctionComponent<Props> = ({
     gaugeHeight,
     sidePaddings,
     valueHeight,
-    barsDefinitions,
     barPaddings,
     labelMain,
     labelMainFontSize,
@@ -540,13 +574,16 @@ export const GaugeMini: FunctionComponent<Props> = ({
   const maxBarHeight = Math.max(gaugeHeight, valueHeight);
   const allBarsHeight = values.length * (maxBarHeight + barPaddings);
 
-  const { groupByColumns } = barsDefinitions;
+  const barsDefinitions = getBarsDefinitions(theme.barsDefinitions);
+
+  // create unified barsDefinition
+
   const labelMapping: any = {};
   barsDefinitions?.bars?.forEach(x => {
     if (!x.label) {
       return;
     }
-    const mstring = createColsMString(groupByColumns, x.barDef);
+    const mstring = createColsMString(barsDefinitions.groupByColumns, x.barDef);
     labelMapping[mstring] = x.label;
   });
 

@@ -12,7 +12,9 @@ const height = 200;
 const gaugeTheme: Required<GaugeMiniLayerConfig> = ({
   ...GAUGE_MINI_THEME_BULLET_DARK,
   labelMain: "Processor usage",
-  axesFormater: (num: number) => num.toFixed(0) + "%",
+  axesFormater: {
+    suffix: "%",
+  },
   valueFormater: (num: number) => num.toFixed(0) + "%",
 });
 
@@ -35,7 +37,11 @@ const gaugeTheme2: Required<GaugeMiniLayerConfig> = {
   },
   labelMain: "Loudness",
   axesFormater: (val: number) => val.toFixed(0) + "dB",
-  valueFormater: (val: number) => val.toFixed(0) + "dB",
+  valueFormater: {
+    decimalPlaces: { digits: 1, isEnforced: true },
+    prefix: "",
+    suffix: " dB",
+  },
 };
 
 const App: FunctionComponent<any> = () => {
@@ -52,7 +58,7 @@ const App: FunctionComponent<any> = () => {
     }, 10);
   }, [val, max, min]);
 
-  const asVal = (value:number) => ([{ colsMString: "field0", value }]);
+  const asVal = (value: number) => ([{ colsMString: "field0", value }]);
 
   return (
     <div className="App" style={{
