@@ -16,11 +16,10 @@ export interface DecimalPlaces {
 export type ColorHexValue = {
   value: number,
   hex: string,
-}
+};
 export type GaugeMiniColors = {
   min: ColorHexValue
   max: ColorHexValue
-  secondary: string
   thresholds?: ColorHexValue[]
 };
 

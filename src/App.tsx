@@ -2,7 +2,7 @@
 import React, { useState, useEffect, FunctionComponent } from "react";
 
 import { InfluxColors } from "@influxdata/clockface";
-import { GaugeMini, getColors } from "./GaugeMini";
+import { GaugeMini } from "./GaugeMini";
 import { GaugeMiniLayerConfig } from "./types";
 import { GAUGE_MINI_THEME_BULLET_DARK, GAUGE_MINI_THEME_PROGRESS_DARK } from "./gaugeMiniStyles";
 
@@ -27,7 +27,7 @@ const gaugeTheme2: Required<GaugeMiniLayerConfig> = {
       { ...gaugeTheme.colors.find(({ type }) => type === "max")!, value: 130 },
     ]
     : gaugeTheme.colors
-    ,
+  ,
   axesSteps: [60, 85],
   barsDefinitions: {
     groupByColumns: { "_field": true },
@@ -48,15 +48,16 @@ const gaugeTheme2: Required<GaugeMiniLayerConfig> = {
 };
 
 const App: FunctionComponent<any> = () => {
-  const { min: { value: min }, max: { value: max } } = getColors(gaugeTheme);
+  const min = -20;
+  const max = 150;
 
-  const [val, setVal] = useState(min - 20);
+  const [val, setVal] = useState(min);
 
   useEffect(() => {
     setTimeout(() => {
       let newVal = val + 1;
-      if (newVal > max + 100)
-        newVal = min - 100;
+      if (newVal > max)
+        newVal = min;
       setVal(newVal);
     }, 10);
   }, [val, max, min]);
@@ -95,15 +96,14 @@ const App: FunctionComponent<any> = () => {
         colors: {
           min: {
             value: 50,
-            hex: "#9aa445"
+            hex: "#9aa445",
           },
           max: {
             value: 150,
             hex: "#E85B1C",
           },
           thresholds: [],
-          secondary: "#202028",
-        }
+        },
       }} {...{ width, height }} />
       <GaugeMini values={asVal(18)} theme={gaugeTheme2} {...{ width, height }} />
       <GaugeMini values={asVal(85)} theme={gaugeTheme2} {...{ width, height }} />
