@@ -1,17 +1,5 @@
 import { FormatStatValueOptions } from "./formatStatValue";
-
-export type Color = {
-  id: string
-  type: "min" | "max" | "threshold" | "scale" | "text" | "background"
-  hex: string
-  name: string
-  value: number
-};
-
-export interface DecimalPlaces {
-  isEnforced?: boolean;
-  digits?: number;
-}
+import { Color } from "./types-giraffe";
 
 export type ColorHexValue = {
   value: number,
@@ -51,7 +39,7 @@ export interface GaugeMiniLayerConfig {
   sidePaddings?: number;
   oveflowFraction?: number;
 
-  colors?: Color[] | GaugeMiniColors;
+  gaugeMiniColors?: Color[] | GaugeMiniColors;
   colorSecondary?: string;
 
   labelMain?: string;

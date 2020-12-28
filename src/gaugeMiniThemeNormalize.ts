@@ -80,7 +80,7 @@ const getAxesSteps = (axesSteps: number | "thresholds" | undefined | number[], c
 };
 
 const getColors = (theme: Required<GaugeMiniLayerConfig>): GaugeMiniColors => {
-  const { colors } = theme;
+  const { gaugeMiniColors: colors } = theme;
 
   if (!Array.isArray(colors)) {
     return {

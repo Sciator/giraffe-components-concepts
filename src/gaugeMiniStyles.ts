@@ -1,5 +1,6 @@
 import { InfluxColors } from "@influxdata/clockface";
-import { Color, GaugeMiniLayerConfig } from "./types";
+import { GaugeMiniLayerConfig } from "./types";
+import { Color } from "./types-giraffe";
 
 export const GAUGE_MINI_THEME_BULLET_DARK: Required<GaugeMiniLayerConfig> = {
   type: "gauge mini",
@@ -15,7 +16,7 @@ export const GAUGE_MINI_THEME_BULLET_DARK: Required<GaugeMiniLayerConfig> = {
   sidePaddings: 20,
   oveflowFraction: .03,
 
-  colors: [
+  gaugeMiniColors: [
     { value: 0, type: "min", hex: InfluxColors.Krypton },
     { value: 50, type: "threshold", hex: InfluxColors.Sulfur },
     { value: 75, type: "threshold", hex: InfluxColors.Topaz },
@@ -56,7 +57,7 @@ export const GAUGE_MINI_THEME_PROGRESS_DARK: Required<GaugeMiniLayerConfig> = {
   sidePaddings: 20,
   oveflowFraction: .03,
 
-  colors: [
+  gaugeMiniColors: [
     { value: 0, type: "min", hex: InfluxColors.Krypton },
     { value: 100, type: "max", hex: InfluxColors.Topaz },
   ] as Color[],

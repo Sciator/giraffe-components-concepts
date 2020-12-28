@@ -1,5 +1,5 @@
 import { isNumber, isString } from "util";
-import { DecimalPlaces } from "./types";
+import { DecimalPlaces } from "./types-giraffe";
 
 
 const preventNegativeZero = (
