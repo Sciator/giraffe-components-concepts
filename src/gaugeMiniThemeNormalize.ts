@@ -57,10 +57,11 @@ const getAxesSteps = (axesSteps: number | "thresholds" | undefined | number[], c
   const { max: { value: max }, min: { value: min } } = colors;
 
   if (Array.isArray(axesSteps)) {
-    if (axesSteps.some(x => x < min || x > max)) {
-      throw new Error(`All axes values must be inside range of colors!`);
+    const steps = axesSteps.filter(x => x > min || x < max);
+    if (axesSteps.length !== steps.length){
+      console.error(`All axes values must be inside range of colors!`);
     }
-    return axesSteps;
+    return steps;
   }
 
   if (axesSteps === "thresholds") {
