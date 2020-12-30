@@ -1,4 +1,4 @@
-import { formatStatValue, FormatStatValueOptions } from "./formatStatValue";
+import { formatStatValue, FormatStatValueOptions } from "../formatStatValue";
 import { GaugeMiniBarsDefinitions, GaugeMiniBarsDefinitionsArr, GaugeMiniColors, GaugeMiniLayerConfig } from "./types";
 import { color as d3Color } from "d3-color";
 import { range } from "d3-array";

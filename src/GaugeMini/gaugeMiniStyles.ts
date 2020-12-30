@@ -1,6 +1,6 @@
 import { InfluxColors } from "@influxdata/clockface";
 import { GaugeMiniLayerConfig } from "./types";
-import { Color } from "./types-giraffe";
+import { Color } from "../types-giraffe";
 
 export const GAUGE_MINI_THEME_BULLET_DARK: Required<GaugeMiniLayerConfig> = {
   type: "gauge mini",

@@ -1,5 +1,5 @@
-import { FormatStatValueOptions } from "./formatStatValue";
-import { Color } from "./types-giraffe";
+import { FormatStatValueOptions } from "../formatStatValue";
+import { Color } from "../types-giraffe";
 
 export type ColorHexValue = {
   value: number,

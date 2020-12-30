@@ -2,9 +2,11 @@
 import React, { useState, useEffect, FunctionComponent } from "react";
 
 import { InfluxColors } from "@influxdata/clockface";
-import { GaugeMini } from "./GaugeMini";
-import { GaugeMiniLayerConfig } from "./types";
-import { GAUGE_MINI_THEME_BULLET_DARK, GAUGE_MINI_THEME_PROGRESS_DARK } from "./gaugeMiniStyles";
+import { GaugeMini } from "./GaugeMini/GaugeMini";
+import { GaugeMiniLayerConfig } from "./GaugeMini/types";
+import { GAUGE_MINI_THEME_BULLET_DARK, GAUGE_MINI_THEME_PROGRESS_DARK } from "./GaugeMini/gaugeMiniStyles";
+import { Candlestick } from "./Candlestick/Candlestick";
+import { range } from "d3-array";
 
 const width = 300;
 const height = 200;
@@ -47,6 +49,8 @@ const gaugeTheme2: Required<GaugeMiniLayerConfig> = {
   },
 };
 
+const randInt = (max: number) => Math.floor(Math.random() * max);
+
 const App: FunctionComponent<any> = () => {
   const min = -20;
   const max = 150;
@@ -64,6 +68,41 @@ const App: FunctionComponent<any> = () => {
 
   const asVal = (value: number) => ([{ colsMString: "field0", value }]);
 
+  const [candlestickValue, setCandlestickValue] = useState(
+    // todo: more realistic random (open match close )
+    range(10).map(() => ({
+      close: randInt(100),
+      high: randInt(100),
+      low: randInt(100),
+      open: randInt(100),
+    }))
+    // .concat({
+    //   close: 1000,
+    //   high: randInt(500),
+    //   low: randInt(500),
+    //   open: randInt(500),
+    // })
+    // .concat({
+    //   close: -1000,
+    //   open: -500+randInt(500),
+    //   high: -500+randInt(500),
+    //   low: -500+randInt(500),
+    // })
+
+    // .concat({
+    //   close:randInt(500),
+    //   high: 1000,
+    //   low: randInt(500),
+    //   open: randInt(500),
+    // })
+    // .concat({
+    //   open: -500+randInt(500),
+    //   close: -500+randInt(500),
+    //   high: -500+randInt(500),
+    //   low: -1000,
+    // })
+  );
+
   return (
     <div className="App" style={{
       backgroundColor: InfluxColors.Castle,
@@ -72,6 +111,8 @@ const App: FunctionComponent<any> = () => {
       overflow: "auto",
       textAlign: "center",
     }}>
+      <Candlestick values={candlestickValue} theme={{}}  {...{ width, height }} />
+
       <GaugeMini values={asVal(val)} theme={gaugeTheme} {...{ width, height }} />
       <GaugeMini values={asVal(val)} theme={gaugeTheme2} {...{ width, height }} />
       <GaugeMini values={asVal(val)} theme={GAUGE_MINI_THEME_BULLET_DARK} {...{ width, height }} />
